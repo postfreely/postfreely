@@ -13,9 +13,9 @@
 			<a href="https://writefreely.org/guide/{{.OfficialVersion}}" target="guide">writer's guide</a>
 			{{if not .SingleUser}}<a href="/privacy">privacy</a>{{end}}
       {{if .WFModesty}}
-			<p style="font-size: 0.9em">powered by <a href="https://writefreely.org">writefreely</a></p>
+			<p style="font-size: 0.9em">{{template "software-credit"}}</p>
 			{{else}}
-			<a href="https://writefreely.org">writefreely {{.Version}}</a>
+			{{template "software-versioned"}}
 			{{end}}
 		</nav>
 	</footer>

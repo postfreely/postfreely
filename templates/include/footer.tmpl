@@ -9,12 +9,12 @@
 					{{if and .LocalTimeline .CanViewReader}}<a href="/read">reader</a>{{end}}
 					{{if .Username}}<a href="https://writefreely.org/guide/{{.OfficialVersion}}" target="guide">writer's guide</a>{{end}}
 					<a href="/privacy">privacy</a>
-					<p style="font-size: 0.9em">powered by <a href="https://writefreely.org">writefreely</a></p>
+					<p style="font-size: 0.9em">{{template "software-credit"}}</p>
 				{{else}}
 					<a href="https://writefreely.org/guide/{{.OfficialVersion}}" target="guide">writer's guide</a>
-					<a href="https://developers.write.as/" title="Build on WriteFreely with our open developer API.">developers</a>
-					<a href="https://github.com/writefreely/writefreely">source code</a>
-					<a href="https://writefreely.org">writefreely {{.Version}}</a>
+					<a href="https://developers.write.as/" title="Build on {{template "software-name"}} with our open developer API.">developers</a>
+					<a href="{{template "software-code-url"}}">source code</a>
+					{{template "software-versioned"}}
 				{{end}}
 			</nav>
 			{{else}}
@@ -29,11 +29,11 @@
 						</ul>
 					</div>
 					<div class="half">
-						<h3><a href="https://writefreely.org" style="color:#444;text-transform:lowercase;">WriteFreely</a></h3>
+						<h3><a href="https://writefreely.org" style="color:#444;text-transform:lowercase;">{{template "software-name"}}</a></h3>
 						<ul>
 							<li><a href="https://writefreely.org/guide/{{.OfficialVersion}}" target="guide">writer's guide</a></li>
-							<li><a href="https://developers.write.as/" title="Build on WriteFreely with our open developer API.">developers</a></li>
-							<li><a href="https://github.com/writefreely/writefreely">source code</a></li>
+							<li><a href="https://developers.write.as/" title="Build on {{template "software-name"}} with our open developer API.">developers</a></li>
+							<li><a href="{{template "software-code-url"}}">source code</a></li>
 							<li style="margin-top:0.8em">{{.Version}}</li>
 						</ul>
 					</div>

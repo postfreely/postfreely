@@ -50,8 +50,8 @@ const (
 	assumedTitleLen = 80
 	postsPerPage    = 10
 
-	serverSoftware = "WriteFreely"
-	softwareURL    = "https://writefreely.org"
+	serverSoftware = "PostFreely"
+	softwareURL    = "http://postfreely.org/"
 )
 
 var (

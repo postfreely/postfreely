@@ -14,7 +14,7 @@
 		{{if not .IsPrivate}}<link rel="alternate" type="application/rss+xml" title="{{.DisplayTitle}} &raquo; Feed" href="{{.CanonicalURL}}feed/" />{{end}}
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<meta name="generator" content="WriteFreely">
+		<meta name="generator" content="{{template "software-name"}}">
 		<meta name="description" content="{{.PlainDescription}}">
 		<meta itemprop="name" content="{{.DisplayTitle}}">
 		<meta itemprop="description" content="{{.PlainDescription}}">
