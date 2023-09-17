@@ -14,8 +14,10 @@ import (
 	"crypto/tls"
 	"database/sql"
 	_ "embed"
+	"errors"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net"
 	"net/http"
 	"net/url"
@@ -46,6 +48,8 @@ import (
 )
 
 const (
+	assumedExecutableName = "postfreely" // Only use this if os.Executable() doesn't work.
+
 	staticDir       = "static"
 	assumedTitleLen = 80
 	postsPerPage    = 10
@@ -147,6 +151,14 @@ func (app *App) LoadConfig() error {
 	cfg, err := config.Load(app.cfgFile)
 	if err != nil {
 		log.Error("Unable to load configuration: %v", err)
+		if errors.Is(err, fs.ErrNotExist) {
+			log.Error("Have you created the config file yet? If not, run —")
+			var cmdname string = assumedExecutableName
+			if s, err := os.Executable(); nil == err {
+				cmdname = s
+			}
+			log.Error("\t%s config start", cmdname)
+		}
 		os.Exit(1)
 		return err
 	}
@@ -408,7 +420,7 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	initKeyPaths(apper.App()) // TODO: find a better way to do this, since it's unneeded in all Apper implementations
 	err = InitKeys(apper)
 	if err != nil {
-		return nil, fmt.Errorf("init keys: %s", err)
+		return nil, fmt.Errorf("init keys: %w", err)
 	}
 	apper.App().InitUpdates()
 
