@@ -407,7 +407,7 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	initKeyPaths(apper.App()) // TODO: find a better way to do this, since it's unneeded in all Apper implementations
 	err = InitKeys(apper)
 	if err != nil {
-		return nil, fmt.Errorf("init keys: %s", err)
+		return nil, fmt.Errorf("init keys: %w", err)
 	}
 	apper.App().InitUpdates()
 
