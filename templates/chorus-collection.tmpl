@@ -106,7 +106,7 @@ body#collection header nav.tabs a:first-child {
 		<footer>
 			<hr />
 			<nav dir="ltr">
-				{{if not .SingleUser}}<a class="home pubd" href="/">{{.SiteName}}</a> &middot; {{end}}powered by <a style="margin-left:0" href="{{template "software-url"}}">writefreely</a>
+				{{if not .SingleUser}}<a class="home pubd" href="/">{{.SiteName}}</a> &middot; {{end}}powered by <a style="margin-left:0" href="{{template "software-url"}}"><span style="text-transform:lowercase;">{{template "software-name"}}</span></a>
 			</nav>
 		</footer>
 		{{ end }}
