@@ -12,7 +12,7 @@ package writefreely
 
 import (
 	"database/sql"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 	"time"
 )
 

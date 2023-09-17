@@ -1,14 +1,14 @@
 # Build image
 FROM golang:1.19-alpine as build
 
-LABEL org.opencontainers.image.source=https://github.com/writefreely/writefreely
+LABEL org.opencontainers.image.source=https://github.com/postfreely/postfreely
 LABEL org.opencontainers.image.description="WriteFreely is a clean, minimalist publishing platform made for writers. Start a blog, share knowledge within your organization, or build a community around the shared act of writing."
 
 RUN apk add --update nodejs npm make g++ git
 RUN npm install -g less less-plugin-clean-css
 
-RUN mkdir -p /go/src/github.com/writefreely/writefreely
-WORKDIR /go/src/github.com/writefreely/writefreely
+RUN mkdir -p /go/src/github.com/postfreely/postfreely
+WORKDIR /go/src/github.com/postfreely/postfreely
 
 COPY . .
 
@@ -21,11 +21,11 @@ RUN make build \
   && make ui
 RUN mkdir /stage && \
     cp -R /go/bin \
-      /go/src/github.com/writefreely/writefreely/templates \
-      /go/src/github.com/writefreely/writefreely/static \
-      /go/src/github.com/writefreely/writefreely/pages \
-      /go/src/github.com/writefreely/writefreely/keys \
-      /go/src/github.com/writefreely/writefreely/cmd \
+      /go/src/github.com/postfreely/postfreely/templates \
+      /go/src/github.com/postfreely/postfreely/static \
+      /go/src/github.com/postfreely/postfreely/pages \
+      /go/src/github.com/postfreely/postfreely/keys \
+      /go/src/github.com/postfreely/postfreely/cmd \
       /stage
 
 # Final image
@@ -39,4 +39,4 @@ VOLUME /go/keys
 EXPOSE 8080
 USER daemon
 
-ENTRYPOINT ["cmd/writefreely/writefreely"]
+ENTRYPOINT ["cmd/postfreely/postfreely"]

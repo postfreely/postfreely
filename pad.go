@@ -17,7 +17,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/page"
 )
 
 func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {

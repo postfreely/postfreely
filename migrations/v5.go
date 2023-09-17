@@ -14,7 +14,7 @@ import (
 	"context"
 	"database/sql"
 
-	wf_db "github.com/writefreely/writefreely/db"
+	wf_db "github.com/postfreely/postfreely/db"
 )
 
 func oauthSlack(db *datastore) error {

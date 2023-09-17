@@ -38,11 +38,11 @@ import (
 	"github.com/writeas/web-core/log"
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/writefreely/writefreely/author"
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/key"
-	"github.com/writefreely/writefreely/migrations"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/author"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/key"
+	"github.com/postfreely/postfreely/migrations"
+	"github.com/postfreely/postfreely/page"
 )
 
 const (
@@ -52,6 +52,7 @@ const (
 
 	serverSoftware = "WriteFreely"
 	softwareURL    = "https://writefreely.org"
+	softwareCodeURL = "https://github.com/postfreely/postfreely"
 )
 
 var (

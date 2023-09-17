@@ -17,7 +17,7 @@ import (
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/page"
 	"html/template"
 	"net/http"
 	"strings"
