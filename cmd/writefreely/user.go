@@ -59,12 +59,10 @@ var (
 )
 
 func addUserAction(c *cli.Context) error {
-	credentials := ""
-	if c.NArg() > 0 {
-		credentials = c.Args().Get(0)
-	} else {
+	if c.NArg() < 1 {
 		return fmt.Errorf("No user passed. Example: writefreely user add [USER]:[PASSWORD]")
 	}
+	credentials := c.Args().Get(0)
 	username, password, err := parseCredentials(credentials)
 	if err != nil {
 		return err
@@ -74,23 +72,19 @@ func addUserAction(c *cli.Context) error {
 }
 
 func delUserAction(c *cli.Context) error {
-	username := ""
-	if c.NArg() > 0 {
-		username = c.Args().Get(0)
-	} else {
+	if c.NArg() < 1 {
 		return fmt.Errorf("No user passed. Example: writefreely user delete [USER]")
 	}
+	username := c.Args().Get(0)
 	app := writefreely.NewApp(c.String("c"))
 	return writefreely.DoDeleteAccount(app, username)
 }
 
 func resetPassAction(c *cli.Context) error {
-	username := ""
-	if c.NArg() > 0 {
-		username = c.Args().Get(0)
-	} else {
+	if c.NArg() < 1 {
 		return fmt.Errorf("No user passed. Example: writefreely user reset-pass [USER]")
 	}
+	username := c.Args().Get(0)
 	app := writefreely.NewApp(c.String("c"))
 	return writefreely.ResetPassword(app, username)
 }
