@@ -368,7 +368,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 
 			// First get actor information
 			if to == nil {
-				return fmt.Errorf("No valid `to` string")
+				return errors.New("No valid `to` string")
 			}
 			fullActor, remoteUser, err = getActor(app, to.String())
 			if err != nil {

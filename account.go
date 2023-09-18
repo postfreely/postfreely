@@ -12,6 +12,7 @@ package writefreely
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -815,7 +816,7 @@ func viewCollections(app *App, u *User, w http.ResponseWriter, r *http.Request) 
 	c, err := app.db.GetCollections(u, app.cfg.App.Host)
 	if err != nil {
 		log.Error("unable to fetch collections: %v", err)
-		return fmt.Errorf("No collections")
+		return errors.New("No collections")
 	}
 
 	f, _ := getSessionFlashes(app, w, r, nil)
@@ -829,7 +830,7 @@ func viewCollections(app *App, u *User, w http.ResponseWriter, r *http.Request) 
 			return err
 		}
 		log.Error("view collections: %v", err)
-		return fmt.Errorf("view collections: %v", err)
+		return fmt.Errorf("view collections: %w", err)
 	}
 	d := struct {
 		*UserPage
@@ -871,7 +872,7 @@ func viewEditCollection(app *App, u *User, w http.ResponseWriter, r *http.Reques
 			return err
 		}
 		log.Error("view edit collection %v", err)
-		return fmt.Errorf("view edit collection: %v", err)
+		return fmt.Errorf("view edit collection: %w", err)
 	}
 	flashes, _ := getSessionFlashes(app, w, r, nil)
 	obj := struct {

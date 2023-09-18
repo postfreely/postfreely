@@ -412,7 +412,7 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	// Load templates
 	err := InitTemplates(apper.App().Config())
 	if err != nil {
-		return nil, fmt.Errorf("load templates: %s", err)
+		return nil, fmt.Errorf("load templates: %w", err)
 	}
 
 	// Load keys and set up session
@@ -429,7 +429,7 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 
 	err = ConnectToDatabase(apper.App())
 	if err != nil {
-		return nil, fmt.Errorf("connect to DB: %s", err)
+		return nil, fmt.Errorf("connect to DB: %w", err)
 	}
 
 	initActivityPub(apper.App())
@@ -581,7 +581,7 @@ func (app *App) InitDecoder() {
 func ConnectToDatabase(app *App) error {
 	// Check database configuration
 	if app.cfg.Database.Type == driverMySQL && (app.cfg.Database.User == "" || app.cfg.Database.Password == "") {
-		return fmt.Errorf("Database user or password not set.")
+		return errors.New("Database user or password not set.")
 	}
 	if app.cfg.Database.Host == "" {
 		app.cfg.Database.Host = "localhost"
@@ -596,7 +596,7 @@ func ConnectToDatabase(app *App) error {
 	// Test database connection
 	err := app.db.Ping()
 	if err != nil {
-		return fmt.Errorf("Database ping failed: %s", err)
+		return fmt.Errorf("Database ping failed: %w", err)
 	}
 
 	return nil
@@ -626,7 +626,7 @@ func CreateConfig(app *App) error {
 	log.Info("Saving configuration %s...", app.cfgFile)
 	err := config.Save(c, app.cfgFile)
 	if err != nil {
-		return fmt.Errorf("Unable to save configuration: %v", err)
+		return fmt.Errorf("Unable to save configuration: %w", err)
 	}
 	return nil
 }
@@ -740,7 +740,7 @@ func Migrate(apper Apper) error {
 
 	err := migrations.Migrate(migrations.NewDatastore(apper.App().db.DB, apper.App().db.driverName))
 	if err != nil {
-		return fmt.Errorf("migrate: %s", err)
+		return fmt.Errorf("migrate: %w", err)
 	}
 	return nil
 }
@@ -892,7 +892,7 @@ func CreateUser(apper Apper, username, password string, isAdmin bool) error {
 	} else {
 		// Abort if trying to create regular user, but no admin exists yet
 		if firstUser == nil {
-			return fmt.Errorf("No admin user exists yet. Create an admin first with: writefreely --create-admin")
+			return errors.New("No admin user exists yet. Create an admin first with: writefreely --create-admin")
 		}
 	}
 
@@ -913,7 +913,7 @@ func CreateUser(apper Apper, username, password string, isAdmin bool) error {
 	// Hash the password
 	hashedPass, err := auth.HashPass([]byte(password))
 	if err != nil {
-		return fmt.Errorf("Unable to hash password: %v", err)
+		return fmt.Errorf("Unable to hash password: %w", err)
 	}
 
 	u := &User{
@@ -929,7 +929,7 @@ func CreateUser(apper Apper, username, password string, isAdmin bool) error {
 	log.Info("Creating %s %s...", userType, usernameDesc)
 	err = apper.App().db.CreateUser(apper.App().Config(), u, desiredUsername, "")
 	if err != nil {
-		return fmt.Errorf("Unable to create user: %s", err)
+		return fmt.Errorf("Unable to create user: %w", err)
 	}
 	log.Info("Done!")
 	return nil
@@ -974,13 +974,13 @@ func adminInitDatabase(app *App) error {
 	log.Info("Initializing appmigrations table...")
 	err := migrations.SetInitialMigrations(migrations.NewDatastore(app.db.DB, app.db.driverName))
 	if err != nil {
-		return fmt.Errorf("Unable to set initial migrations: %v", err)
+		return fmt.Errorf("Unable to set initial migrations: %w", err)
 	}
 
 	log.Info("Running migrations...")
 	err = migrations.Migrate(migrations.NewDatastore(app.db.DB, app.db.driverName))
 	if err != nil {
-		return fmt.Errorf("migrate: %s", err)
+		return fmt.Errorf("migrate: %w", err)
 	}
 
 	log.Info("Done.")
