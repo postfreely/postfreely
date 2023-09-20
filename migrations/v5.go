@@ -14,55 +14,55 @@ import (
 	"context"
 	"database/sql"
 
-	wf_db "github.com/writefreely/writefreely/db"
+	dbase "github.com/writefreely/writefreely/db"
 )
 
 func oauthSlack(db *datastore) error {
-	dialect := wf_db.DialectMySQL
-	if db.driverName == driverSQLite {
-		dialect = wf_db.DialectSQLite
+	dialect := dbase.DialectMySQL
+	if db.driverName == dbase.TypeSQLite {
+		dialect = dbase.DialectSQLite
 	}
-	return wf_db.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
-		builders := []wf_db.SQLBuilder{
+	return dbase.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
+		builders := []dbase.SQLBuilder{
 			dialect.
 				AlterTable("oauth_client_states").
 				AddColumn(dialect.
 					Column(
 						"provider",
-						wf_db.ColumnTypeVarChar,
-						wf_db.OptionalInt{Set: true, Value: 24}).SetDefault("")),
+						dbase.ColumnTypeVarChar,
+						dbase.OptionalInt{Set: true, Value: 24}).SetDefault("")),
 			dialect.
 				AlterTable("oauth_client_states").
 				AddColumn(dialect.
 					Column(
 						"client_id",
-						wf_db.ColumnTypeVarChar,
-						wf_db.OptionalInt{Set: true, Value: 128}).SetDefault("")),
+						dbase.ColumnTypeVarChar,
+						dbase.OptionalInt{Set: true, Value: 128}).SetDefault("")),
 			dialect.
 				AlterTable("oauth_users").
 				AddColumn(dialect.
 					Column(
 						"provider",
-						wf_db.ColumnTypeVarChar,
-						wf_db.OptionalInt{Set: true, Value: 24}).SetDefault("")),
+						dbase.ColumnTypeVarChar,
+						dbase.OptionalInt{Set: true, Value: 24}).SetDefault("")),
 			dialect.
 				AlterTable("oauth_users").
 				AddColumn(dialect.
 					Column(
 						"client_id",
-						wf_db.ColumnTypeVarChar,
-						wf_db.OptionalInt{Set: true, Value: 128}).SetDefault("")),
+						dbase.ColumnTypeVarChar,
+						dbase.OptionalInt{Set: true, Value: 128}).SetDefault("")),
 			dialect.
 				AlterTable("oauth_users").
 				AddColumn(dialect.
 					Column(
 						"access_token",
-						wf_db.ColumnTypeVarChar,
-						wf_db.OptionalInt{Set: true, Value: 512}).SetDefault("")),
+						dbase.ColumnTypeVarChar,
+						dbase.OptionalInt{Set: true, Value: 512}).SetDefault("")),
 			dialect.CreateUniqueIndex("oauth_users_uk", "oauth_users", "user_id", "provider", "client_id"),
 		}
 
-		if dialect != wf_db.DialectSQLite {
+		if dialect != dbase.DialectSQLite {
 			// This updates the length of the `remote_user_id` column. It isn't needed for SQLite databases.
 			builders = append(builders, dialect.
 				AlterTable("oauth_users").
@@ -70,8 +70,8 @@ func oauthSlack(db *datastore) error {
 					dialect.
 						Column(
 							"remote_user_id",
-							wf_db.ColumnTypeVarChar,
-							wf_db.OptionalInt{Set: true, Value: 128})))
+							dbase.ColumnTypeVarChar,
+							dbase.OptionalInt{Set: true, Value: 128})))
 		}
 
 		for _, builder := range builders {

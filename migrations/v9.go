@@ -10,6 +10,10 @@
 
 package migrations
 
+import (
+	dbase "github.com/writefreely/writefreely/db"
+)
+
 func optimizeDrafts(db *datastore) error {
 	t, err := db.Begin()
 	if err != nil {
@@ -17,7 +21,7 @@ func optimizeDrafts(db *datastore) error {
 		return err
 	}
 
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		_, err = t.Exec(`CREATE INDEX key_owner_post_id ON posts (owner_id, id)`)
 	} else {
 		_, err = t.Exec(`ALTER TABLE posts ADD INDEX(owner_id, id)`)

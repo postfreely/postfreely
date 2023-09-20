@@ -20,6 +20,8 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"golang.org/x/net/idna"
+
+	"github.com/writefreely/writefreely/db"
 )
 
 const (
@@ -217,7 +219,7 @@ func New() *Config {
 
 // UseMySQL resets the Config's Database to use default values for a MySQL setup.
 func (cfg *Config) UseMySQL(fresh bool) {
-	cfg.Database.Type = "mysql"
+	cfg.Database.Type = db.TypeMySQL
 	if fresh {
 		cfg.Database.Host = "localhost"
 		cfg.Database.Port = 3306
@@ -226,7 +228,7 @@ func (cfg *Config) UseMySQL(fresh bool) {
 
 // UseSQLite resets the Config's Database to use default values for a SQLite setup.
 func (cfg *Config) UseSQLite(fresh bool) {
-	cfg.Database.Type = "sqlite3"
+	cfg.Database.Type = db.TypeSQLite
 	if fresh {
 		cfg.Database.FileName = "writefreely.db"
 	}

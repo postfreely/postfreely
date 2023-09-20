@@ -22,6 +22,8 @@ import (
 	"github.com/writeas/web-core/log"
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
+
+	dbase "github.com/writefreely/writefreely/db"
 )
 
 func init() {
@@ -45,11 +47,11 @@ func init() {
 }
 
 func (db *datastore) isDuplicateKeyErr(err error) bool {
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		if err, ok := err.(*sqlite.Error); ok {
 			return err.Code() == sqlite3.SQLITE_CONSTRAINT
 		}
-	} else if db.driverName == driverMySQL {
+	} else if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrDuplicateKey
 		}
@@ -61,7 +63,7 @@ func (db *datastore) isDuplicateKeyErr(err error) bool {
 }
 
 func (db *datastore) isIgnorableError(err error) bool {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrCollationMix
 		}
@@ -73,7 +75,7 @@ func (db *datastore) isIgnorableError(err error) bool {
 }
 
 func (db *datastore) isHighLoadError(err error) bool {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrMaxUserConns || mysqlErr.Number == mySQLErrTooManyConns
 		}
