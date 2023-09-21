@@ -1123,8 +1123,7 @@ func fetchPost(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	p.extractData()
 
-	accept := r.Header.Get("Accept")
-	if strings.Contains(accept, "application/activity+json") {
+	if IsActivityPubRequest(r) {
 		if coll == nil {
 			// This is a draft post; 404 for now
 			// TODO: return ActivityObject
