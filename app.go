@@ -582,8 +582,8 @@ func (app *App) InitDecoder() {
 // tests the connection.
 func ConnectToDatabase(app *App) error {
 	// Check database configuration
-	if app.cfg.Database.Type == dbase.TypeMySQL && (app.cfg.Database.User == "" || app.cfg.Database.Password == "") {
-		return errors.New("Database user or password not set.")
+	if app.cfg.Database.Type == dbase.TypeMySQL && app.cfg.Database.User == "" {
+		return errors.New("Database user not set.")
 	}
 	if app.cfg.Database.Host == "" {
 		app.cfg.Database.Host = "localhost"
