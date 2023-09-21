@@ -536,7 +536,7 @@ requests. We recommend supplying a valid host name.`)
 				os.Exit(1)
 			}
 		} else {
-			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.cfg.Server.Port)
+			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.cfg.Server.WWWPort)
 		}
 
 		log.Info("Serving on %s://%s", protocol, bindAddress)
