@@ -181,7 +181,7 @@ func handleFetchCollectionOutbox(app *App, w http.ResponseWriter, r *http.Reques
 	posts, err := app.db.GetPosts(app.cfg, c, p, false, true, false)
 	if err != nil {
 		log.Error("get posts for outbox: %v", err)
-		return ErrPostNotFound
+		return err
 	}
 	for _, pp := range *posts {
 		pp.Collection = res
