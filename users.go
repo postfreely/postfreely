@@ -16,7 +16,7 @@ import (
 	"github.com/guregu/null/zero"
 	"github.com/writeas/web-core/data"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/key"
+	"github.com/postfreely/postfreely/key"
 )
 
 type UserStatus int

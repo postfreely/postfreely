@@ -24,7 +24,7 @@ import (
 	"github.com/writeas/web-core/l10n"
 	"github.com/writeas/web-core/log"
 
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 )
 
 var (

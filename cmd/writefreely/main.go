@@ -11,14 +11,20 @@
 package main
 
 import (
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely"
+	"github.com/postfreely/postfreely"
+)
+
+const (
+	assumedExecutableName = "postfreely" // Only use this if os.Executable() doesn't work.
 )
 
 func main() {
@@ -118,6 +124,14 @@ func main() {
 	err := app.Run(os.Args)
 	if err != nil {
 		log.Error(err.Error())
+		if errors.Is(err, fs.ErrNotExist) {
+			log.Error("Have you generated the keys yet? If not, run —")
+			var cmdname string = assumedExecutableName
+			if s, err := os.Executable(); nil == err {
+				cmdname = s
+			}
+			log.Error("\t%s keys generate", cmdname)
+		}
 		os.Exit(1)
 	}
 }

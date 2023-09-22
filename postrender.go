@@ -33,8 +33,8 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/parser"
 
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/parse"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/parse"
 )
 
 var (

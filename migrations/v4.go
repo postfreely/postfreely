@@ -14,20 +14,20 @@ import (
 	"context"
 	"database/sql"
 
-	wf_db "github.com/writefreely/writefreely/db"
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 func oauth(db *datastore) error {
-	dialect := wf_db.DialectMySQL
-	if db.driverName == driverSQLite {
-		dialect = wf_db.DialectSQLite
+	dialect := dbase.DialectMySQL
+	if db.driverName == dbase.TypeSQLite {
+		dialect = dbase.DialectSQLite
 	}
-	return wf_db.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
+	return dbase.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
 		createTableUsersOauth, err := dialect.
 			Table("oauth_users").
 			SetIfNotExists(false).
-			Column(dialect.Column("user_id", wf_db.ColumnTypeInteger, wf_db.UnsetSize)).
-			Column(dialect.Column("remote_user_id", wf_db.ColumnTypeInteger, wf_db.UnsetSize)).
+			Column(dialect.Column("user_id", dbase.ColumnTypeInteger, dbase.UnsetSize)).
+			Column(dialect.Column("remote_user_id", dbase.ColumnTypeInteger, dbase.UnsetSize)).
 			ToSQL()
 		if err != nil {
 			return err
@@ -35,9 +35,9 @@ func oauth(db *datastore) error {
 		createTableOauthClientState, err := dialect.
 			Table("oauth_client_states").
 			SetIfNotExists(false).
-			Column(dialect.Column("state", wf_db.ColumnTypeVarChar, wf_db.OptionalInt{Set: true, Value: 255})).
-			Column(dialect.Column("used", wf_db.ColumnTypeBool, wf_db.UnsetSize)).
-			Column(dialect.Column("created_at", wf_db.ColumnTypeDateTime, wf_db.UnsetSize).SetDefaultCurrentTimestamp()).
+			Column(dialect.Column("state", dbase.ColumnTypeVarChar, dbase.OptionalInt{Set: true, Value: 255})).
+			Column(dialect.Column("used", dbase.ColumnTypeBool, dbase.UnsetSize)).
+			Column(dialect.Column("created_at", dbase.ColumnTypeDateTime, dbase.UnsetSize).SetDefaultCurrentTimestamp()).
 			UniqueConstraint("state").
 			ToSQL()
 		if err != nil {

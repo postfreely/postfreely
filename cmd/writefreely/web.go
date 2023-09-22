@@ -14,7 +14,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely"
+	"github.com/postfreely/postfreely"
 )
 
 var (

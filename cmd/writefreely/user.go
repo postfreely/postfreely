@@ -14,7 +14,7 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
-	"github.com/writefreely/writefreely"
+	"github.com/postfreely/postfreely"
 )
 
 var (

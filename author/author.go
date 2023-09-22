@@ -12,7 +12,7 @@ package author
 
 import (
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 	"os"
 	"path/filepath"
 	"regexp"

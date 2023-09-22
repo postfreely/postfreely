@@ -2,9 +2,9 @@
 
 Welcome! We're glad you're interested in contributing to WriteFreely.
 
-For **questions**, **help**, **feature requests**, and **general discussion**, please use [our forum](https://discuss.write.as).
+For **questions**, **help**, **feature requests**, and **general discussion**, please use [our forum](https://flamewar.social/c/postfreely).
 
-For **bug reports**, please [open a GitHub issue](https://github.com/writefreely/writefreely/issues/new). See our guide on [submitting bug reports](https://writefreely.org/contribute#bugs).
+For **bug reports**, please [open a GitHub issue](https://github.com/postfreely/postfreely/issues/new). See our guide on [submitting bug reports](https://writefreely.org/contribute#bugs).
 
 ## Getting Started
 
@@ -18,7 +18,7 @@ First, you'll want to clone the WriteFreely repo, install development dependenci
 
 ### Starting development
 
-Next, [join our forum](https://discuss.write.as) so you can discuss development with the team. Then take a look at [our roadmap on Phabricator](https://phabricator.write.as/tag/write_freely/) to see where the project is today and where it's headed.
+Next, [join our forum](https://flamewar.social/c/postfreely) so you can discuss development with the team. Then take a look at [our roadmap on Phabricator](https://phabricator.write.as/tag/write_freely/) to see where the project is today and where it's headed.
 
 When you find something you want to work on, start a new topic on the forum or jump into an existing discussion, if there is one. The team will respond and continue the conversation there.
 
@@ -80,9 +80,9 @@ We highly value commit messages that follow established form within the project.
 
 When in doubt, look to our existing git history for examples of good commit messages. Here are a few:
 
-* [Rename Suspend status to Silence](https://github.com/writefreely/writefreely/commit/7e014ca65958750ab703e317b1ce8cfc4aad2d6e)
-* [Show 404 when remote user not found](https://github.com/writefreely/writefreely/commit/867eb53b3596bd7b3f2be3c53a3faf857f4cd36d)
-* [Fix post deletion on Pleroma](https://github.com/writefreely/writefreely/commit/fe82cbb96e3d5c57cfde0db76c28c4ea6dabfe50)
+* [Rename Suspend status to Silence](https://github.com/postfreely/postfreely/commit/7e014ca65958750ab703e317b1ce8cfc4aad2d6e)
+* [Show 404 when remote user not found](https://github.com/postfreely/postfreely/commit/867eb53b3596bd7b3f2be3c53a3faf857f4cd36d)
+* [Fix post deletion on Pleroma](https://github.com/postfreely/postfreely/commit/fe82cbb96e3d5c57cfde0db76c28c4ea6dabfe50)
 
 ### Submitting pull requests
 
@@ -96,4 +96,4 @@ Beyond that, we prioritize pull requests in this order:
 2. Superficial changes and improvements that don't adversely impact users
 3. New features and changes that have been discussed before with the team
 
-Any pull requests that haven't previously been discussed with the team may be extensively delayed or closed, especially if they require a wider consideration before integrating into the project. When in doubt, please reach out [on the forum](https://discuss.write.as) before submitting a pull request.
+Any pull requests that haven't previously been discussed with the team may be extensively delayed or closed, especially if they require a wider consideration before integrating into the project. When in doubt, please reach out [on the forum](https://flamewar.social/c/postfreely) before submitting a pull request.
