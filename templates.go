@@ -68,6 +68,12 @@ func initTemplate(parentDir, name string) {
 
 	files := []string{
 		filepath.Join(parentDir, templatesDir, name+".tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-name.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-code-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-community-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-credit.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-versioned.tmpl"),
 		filepath.Join(parentDir, templatesDir, "include", "footer.tmpl"),
 		filepath.Join(parentDir, templatesDir, "base.tmpl"),
 		filepath.Join(parentDir, templatesDir, "user", "include", "silenced.tmpl"),
@@ -92,6 +98,12 @@ func initPage(parentDir, path, key string) {
 
 	files := []string{
 		path,
+		filepath.Join(parentDir, templatesDir, "software-name.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-code-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-community-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-credit.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-versioned.tmpl"),
 		filepath.Join(parentDir, templatesDir, "include", "footer.tmpl"),
 		filepath.Join(parentDir, templatesDir, "base.tmpl"),
 		filepath.Join(parentDir, templatesDir, "user", "include", "silenced.tmpl"),
@@ -111,6 +123,12 @@ func initUserPage(parentDir, path, key string) {
 
 	userPages[key] = template.Must(template.New(key).Funcs(funcMap).ParseFiles(
 		path,
+		filepath.Join(parentDir, templatesDir, "software-name.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-code-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-community-url.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-credit.tmpl"),
+		filepath.Join(parentDir, templatesDir, "software-versioned.tmpl"),
 		filepath.Join(parentDir, templatesDir, "user", "include", "header.tmpl"),
 		filepath.Join(parentDir, templatesDir, "user", "include", "footer.tmpl"),
 		filepath.Join(parentDir, templatesDir, "user", "include", "silenced.tmpl"),

@@ -55,8 +55,8 @@ const (
 	assumedTitleLen = 80
 	postsPerPage    = 10
 
-	serverSoftware = "WriteFreely"
-	softwareURL    = "https://writefreely.org"
+	serverSoftware = "PostFreely"
+	softwareURL    = "http://postfreely.org/"
 	softwareCodeURL = "https://github.com/postfreely/postfreely"
 )
 

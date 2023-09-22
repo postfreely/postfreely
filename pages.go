@@ -65,13 +65,13 @@ func defaultPrivacyTitle() sql.NullString {
 
 func defaultAboutPage(cfg *config.Config) string {
 	if cfg.App.Federation {
-		return `_` + cfg.App.SiteName + `_ is an interconnected place for you to write and publish, powered by [WriteFreely](https://writefreely.org) and ActivityPub.`
+		return `_` + cfg.App.SiteName + `_ is an interconnected place for you to write and publish, powered by [`+serverSoftware+`](`+softwareURL+`) and ActivityPub.`
 	}
-	return `_` + cfg.App.SiteName + `_ is a place for you to write and publish, powered by [WriteFreely](https://writefreely.org).`
+	return `_` + cfg.App.SiteName + `_ is a place for you to write and publish, powered by [`+serverSoftware+`](`+softwareURL+`).`
 }
 
 func defaultPrivacyPolicy(cfg *config.Config) string {
-	return `[WriteFreely](https://writefreely.org), the software that powers this site, is built to enforce your right to privacy by default.
+	return `[`+serverSoftware+`](`+softwareURL+`), the software that powers this site, is built to enforce your right to privacy by default.
 
 It retains as little data about you as possible, not even requiring an email address to sign up. However, if you _do_ give us your email address, it is stored encrypted in our database. We salt and hash your account's password.
 
@@ -123,7 +123,7 @@ func defaultLandingBody(cfg *config.Config) string {
 	if cfg.App.Federation {
 		return `## Join the Fediverse
 
-The fediverse is a large network of platforms that all speak a common language. Imagine if you could reply to Instagram posts from Twitter, or interact with your favorite Medium blogs from Facebook -- federated alternatives like [PixelFed](https://pixelfed.org), [Mastodon](https://joinmastodon.org), and WriteFreely enable you to do these types of things.
+The fediverse is a large network of platforms that all speak a common language. Imagine if you could reply to Instagram posts from Twitter, or interact with your favorite Medium blogs from Facebook -- federated alternatives like [PixelFed](https://pixelfed.org), [Mastodon](https://joinmastodon.org), and `+serverSoftware+` enable you to do these types of things.
 
 <div style="text-align:center">
 	<iframe style="width: 560px; height: 315px; max-width: 100%;" sandbox="allow-same-origin allow-scripts" src="https://video.writeas.org/videos/embed/cc55e615-d204-417c-9575-7b57674cc6f3" frameborder="0" allowfullscreen></iframe>
@@ -131,7 +131,7 @@ The fediverse is a large network of platforms that all speak a common language. 
 
 ## Write More Socially
 
-WriteFreely can communicate with other federated platforms like Mastodon, so people can follow your blogs, bookmark their favorite posts, and boost them to their followers. Sign up above to create a blog and join the fediverse.`
+`+serverSoftware+` can communicate with other federated platforms like Mastodon, so people can follow your blogs, bookmark their favorite posts, and boost them to their followers. Sign up above to create a blog and join the fediverse.`
 	}
 	return ""
 }

@@ -13,15 +13,15 @@
 		{{end}}
 
 		{{if not .WFModesty}}
-		<h2 style="margin-top:2em">About WriteFreely</h2>
-		<p><a href="https://writefreely.org">WriteFreely</a> is a self-hosted, decentralized blogging platform for publishing beautiful, simple blogs.</p>
+		<h2 style="margin-top:2em">About {{template "software-name"}}</h2>
+		<p><a href="{{template "software-url"}}">{{template "software-name"}}</a> is a self-hosted, decentralized blogging platform for publishing beautiful, simple blogs.</p>
 		<p>It lets you publish a single blog, or host a community of writers who can create multiple blogs under one account. You can also enable federation, which allows people in the fediverse to follow your blog, bookmark your posts, and share them with others.</p>
 		<div class="clearfix blurbs" style="font-size: 1.3em;text-align:center">
 			<div class="half big">
-				<p><a href="https://writefreely.org/start">Start an instance</a></p>
+				<p><a href="{{template "software-community-url"}}">Discuss with community</a></p>
 			</div>
 			<div class="half big">
-				<p><a href="https://writefreely.org">WriteFreely</a></p>
+				<p><a href="{{template "software-url"}}">{{template "software-name"}}</a></p>
 			</div>
 		</div>
 		{{end}}

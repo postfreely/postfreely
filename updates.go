@@ -23,7 +23,7 @@ import (
 // software versions
 const defaultUpdatesCacheTime = 12 * time.Hour
 
-// updatesCache holds data about current and new releases of the writefreely
+// updatesCache holds data about current and new releases of the postfreely
 // software
 type updatesCache struct {
 	mu             sync.Mutex
@@ -34,7 +34,7 @@ type updatesCache struct {
 	checkError     error
 }
 
-// CheckNow asks for the latest released version of writefreely and updates
+// CheckNow asks for the latest released version of postfreely and updates
 // the cache last checked time. If the version postdates the current 'latest'
 // the version value is replaced.
 func (uc *updatesCache) CheckNow() error {

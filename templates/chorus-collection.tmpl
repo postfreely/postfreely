@@ -14,7 +14,7 @@
 		{{if not .IsPrivate}}<link rel="alternate" type="application/rss+xml" title="{{.DisplayTitle}} &raquo; Feed" href="{{.CanonicalURL}}feed/" />{{end}}
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-		<meta name="generator" content="WriteFreely">
+		<meta name="generator" content="{{template "software-name"}}">
 		<meta name="description" content="{{.Description}}">
 		<meta itemprop="name" content="{{.DisplayTitle}}">
 		<meta itemprop="description" content="{{.Description}}">
@@ -106,7 +106,7 @@ body#collection header nav.tabs a:first-child {
 		<footer>
 			<hr />
 			<nav dir="ltr">
-				{{if not .SingleUser}}<a class="home pubd" href="/">{{.SiteName}}</a> &middot; {{end}}powered by <a style="margin-left:0" href="https://writefreely.org">writefreely</a>
+				{{if not .SingleUser}}<a class="home pubd" href="/">{{.SiteName}}</a> &middot; {{end}}powered by <a style="margin-left:0" href="{{template "software-url"}}"><span style="text-transform:lowercase;">{{template "software-name"}}</span></a>
 			</nav>
 		</footer>
 		{{ end }}
