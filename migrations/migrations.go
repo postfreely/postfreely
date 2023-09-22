@@ -16,7 +16,7 @@ import (
 
 	"github.com/writeas/web-core/log"
 
-	dbase "github.com/writefreely/writefreely/db"
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 // TODO: refactor to use the datastore struct from writefreely pkg

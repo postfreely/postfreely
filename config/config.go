@@ -21,7 +21,7 @@ import (
 	"github.com/yuin/goldmark/extension"
 	"golang.org/x/net/idna"
 
-	"github.com/writefreely/writefreely/db"
+	"github.com/postfreely/postfreely/db"
 )
 
 const (
