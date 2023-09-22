@@ -15,7 +15,7 @@ import (
 
 	"github.com/guregu/null/zero"
 	"github.com/stretchr/testify/assert"
-	"github.com/writefreely/writefreely"
+	"github.com/postfreely/postfreely"
 )
 
 func TestPostSummary(t *testing.T) {

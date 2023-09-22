@@ -24,8 +24,8 @@ import (
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
 	"github.com/writefreely/go-gopher"
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/page"
 )
 
 // UserLevel represents the required user level for accessing an endpoint

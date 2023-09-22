@@ -13,7 +13,7 @@ package writefreely
 import (
 	"testing"
 
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 )
 
 func TestApplyBasicMarkdown(t *testing.T) {

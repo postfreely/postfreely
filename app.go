@@ -40,11 +40,12 @@ import (
 	"github.com/writeas/web-core/log"
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/writefreely/writefreely/author"
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/key"
-	"github.com/writefreely/writefreely/migrations"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/author"
+  dbase "github.com/postfreely/postfreely/db"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/key"
+	"github.com/postfreely/postfreely/migrations"
+	"github.com/postfreely/postfreely/page"
 )
 
 const (
@@ -56,6 +57,7 @@ const (
 
 	serverSoftware = "WriteFreely"
 	softwareURL    = "https://writefreely.org"
+	softwareCodeURL = "https://github.com/postfreely/postfreely"
 )
 
 var (
@@ -536,7 +538,7 @@ requests. We recommend supplying a valid host name.`)
 				os.Exit(1)
 			}
 		} else {
-			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.cfg.Server.Port)
+			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.cfg.Server.WWWPort)
 		}
 
 		log.Info("Serving on %s://%s", protocol, bindAddress)
@@ -580,7 +582,7 @@ func (app *App) InitDecoder() {
 // tests the connection.
 func ConnectToDatabase(app *App) error {
 	// Check database configuration
-	if app.cfg.Database.Type == driverMySQL && (app.cfg.Database.User == "" || app.cfg.Database.Password == "") {
+	if app.cfg.Database.Type == dbase.TypeMySQL && (app.cfg.Database.User == "" || app.cfg.Database.Password == "") {
 		return fmt.Errorf("Database user or password not set.")
 	}
 	if app.cfg.Database.Host == "" {
@@ -835,10 +837,10 @@ func connectToDatabase(app *App) {
 
 	var db *sql.DB
 	var err error
-	if app.cfg.Database.Type == driverMySQL {
+	if app.cfg.Database.Type == dbase.TypeMySQL {
 		db, err = sql.Open(app.cfg.Database.Type, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=%s&tls=%t", app.cfg.Database.User, app.cfg.Database.Password, app.cfg.Database.Host, app.cfg.Database.Port, app.cfg.Database.Database, url.QueryEscape(time.Local.String()), app.cfg.Database.TLS))
 		db.SetMaxOpenConns(50)
-	} else if app.cfg.Database.Type == driverSQLite {
+	} else if app.cfg.Database.Type == dbase.TypeSQLite {
 		if !SQLiteEnabled {
 			log.Error("Invalid database type '%s'. Binary wasn't compiled with SQLite3 support.", app.cfg.Database.Type)
 			os.Exit(1)
@@ -850,7 +852,7 @@ func connectToDatabase(app *App) {
 		db, err = sql.Open("sqlite", app.cfg.Database.FileName+"?parseTime=true&cached=shared")
 		db.SetMaxOpenConns(2)
 	} else {
-		log.Error("Invalid database type '%s'. Only 'mysql' and 'sqlite3' are supported right now.", app.cfg.Database.Type)
+		log.Error("Invalid database type %q. Only %q and %q are supported right now.", app.cfg.Database.Type, dbase.TypeMySQL, dbase.TypeSQLite)
 		os.Exit(1)
 	}
 	if err != nil {
@@ -943,7 +945,7 @@ var sqliteSql string
 
 func adminInitDatabase(app *App) error {
 	var schema string
-	if app.cfg.Database.Type == driverSQLite {
+	if app.cfg.Database.Type == dbase.TypeSQLite {
 		schema = sqliteSql
 	} else {
 		schema = schemaSql

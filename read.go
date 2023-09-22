@@ -25,7 +25,7 @@ import (
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/memo"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/page"
 )
 
 const (

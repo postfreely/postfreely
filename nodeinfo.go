@@ -13,7 +13,7 @@ package writefreely
 import (
 	"github.com/writeas/web-core/log"
 	"github.com/writefreely/go-nodeinfo"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 	"strings"
 )
 
@@ -45,7 +45,7 @@ func nodeInfoConfig(db *datastore, cfg *config.Config) *nodeinfo.Config {
 			Private:         cfg.App.Private,
 			Software: nodeinfo.SoftwareMeta{
 				HomePage: softwareURL,
-				GitHub:   "https://github.com/writefreely/writefreely",
+				GitHub:   softwareCodeURL,
 				Follow:   "https://writing.exchange/@write_as",
 			},
 			MaxBlogs:     cfg.App.MaxBlogs,

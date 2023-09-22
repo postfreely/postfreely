@@ -10,11 +10,15 @@
 
 package migrations
 
+import (
+	dbase "github.com/writefreely/writefreely/db"
+)
+
 /**
  * Widen `oauth_users.access_token`, necessary only for mysql
  */
 func widenOauthAcceesToken(db *datastore) error {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		t, err := db.Begin()
 		if err != nil {
 			t.Rollback()
