@@ -86,15 +86,30 @@ func Configure(fname string, configSections string) (*SetupData, error) {
 			// Running in dev environment or behind reverse proxy; ask for port
 			prompt = promptui.Prompt{
 				Templates: tmpls,
-				Label:     "Local port",
+				Label:     "Local HTTP port",
 				Validate:  validatePort,
-				Default:   fmt.Sprintf("%d", data.Config.Server.Port),
+				Default:   fmt.Sprintf("%d", data.Config.Server.WWWPort),
 			}
 			port, err := prompt.Run()
 			if err != nil {
 				return data, err
 			}
-			data.Config.Server.Port, _ = strconv.Atoi(port) // Ignore error, as we've already validated number
+			data.Config.Server.WWWPort, _ = strconv.Atoi(port) // Ignore error, as we've already validated number
+		}
+
+		if isDevEnv || !isStandalone {
+			// Running in dev environment or behind reverse proxy; ask for port
+			prompt = promptui.Prompt{
+				Templates: tmpls,
+				Label:     "Local Gopher port",
+				Validate:  validatePort,
+				Default:   fmt.Sprintf("%d", data.Config.Server.GopherPort),
+			}
+			port, err := prompt.Run()
+			if err != nil {
+				return data, err
+			}
+			data.Config.Server.GopherPort, _ = strconv.Atoi(port) // Ignore error, as we've already validated number
 		}
 
 		if isStandalone {
@@ -109,11 +124,11 @@ func Configure(fname string, configSections string) (*SetupData, error) {
 			}
 			if sel == 0 {
 				data.Config.Server.Autocert = false
-				data.Config.Server.Port = 80
+				data.Config.Server.WWWPort = 80
 				data.Config.Server.TLSCertPath = ""
 				data.Config.Server.TLSKeyPath = ""
 			} else if sel == 1 || sel == 2 {
-				data.Config.Server.Port = 443
+				data.Config.Server.WWWPort = 443
 				data.Config.Server.Autocert = sel == 2
 
 				if sel == 1 {
@@ -309,7 +324,7 @@ func Configure(fname string, configSections string) (*SetupData, error) {
 
 		prompt = promptui.Prompt{
 			Templates: tmpls,
-			Label:     "Public URL",
+			Label:     "Public HTTP URL",
 			Validate:  validateDomain,
 			Default:   data.Config.App.Host,
 		}

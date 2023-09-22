@@ -36,7 +36,7 @@ type (
 	// ServerCfg holds values that affect how the HTTP server runs
 	ServerCfg struct {
 		HiddenHost string `ini:"hidden_host"`
-		Port       int    `ini:"port"`
+		WWWPort    int    `ini:"port"`
 		Bind       string `ini:"bind"`
 
 		TLSCertPath string `ini:"tls_cert_path"`
@@ -197,8 +197,9 @@ type (
 func New() *Config {
 	c := &Config{
 		Server: ServerCfg{
-			Port: 8080,
+			WWWPort: 8080,
 			Bind: "localhost", /* IPV6 support when not using localhost? */
+			GopherPort: 7007,
 		},
 		App: AppCfg{
 			Host:           "http://localhost:8080",
@@ -235,7 +236,7 @@ func (cfg *Config) UseSQLite(fresh bool) {
 // IsSecureStandalone returns whether or not the application is running as a
 // standalone server with TLS enabled.
 func (cfg *Config) IsSecureStandalone() bool {
-	return cfg.Server.Port == 443 && cfg.Server.TLSCertPath != "" && cfg.Server.TLSKeyPath != ""
+	return cfg.Server.WWWPort == 443 && cfg.Server.TLSCertPath != "" && cfg.Server.TLSKeyPath != ""
 }
 
 func (ac *AppCfg) LandingPath() string {
