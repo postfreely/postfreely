@@ -23,7 +23,7 @@ import (
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 
-	dbase "github.com/writefreely/writefreely/db"
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 func init() {

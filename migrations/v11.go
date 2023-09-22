@@ -11,7 +11,7 @@
 package migrations
 
 import (
-	dbase "github.com/writefreely/writefreely/db"
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 /**

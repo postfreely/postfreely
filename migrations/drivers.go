@@ -13,7 +13,7 @@ package migrations
 import (
 	"fmt"
 
-	dbase "github.com/writefreely/writefreely/db"
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 // TODO: use now() from writefreely pkg
