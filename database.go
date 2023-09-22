@@ -242,7 +242,7 @@ func (db *datastore) CreateUser(cfg *config.Config, u *User, collectionTitle str
 func (db *datastore) UpdateUserEmail(keys *key.Keychain, userID int64, email string) error {
 	encEmail, err := data.Encrypt(keys.EmailKey, email)
 	if err != nil {
-		return fmt.Errorf("Couldn't encrypt email %s: %s\n", email, err)
+		return fmt.Errorf("Couldn't encrypt email %s: %w\n", email, err)
 	}
 
 	return db.UpdateEncryptedUserEmail(userID, encEmail)
@@ -251,7 +251,7 @@ func (db *datastore) UpdateUserEmail(keys *key.Keychain, userID int64, email str
 func (db *datastore) UpdateEncryptedUserEmail(userID int64, encEmail []byte) error {
 	_, err := db.Exec("UPDATE users SET email = ? WHERE id = ?", encEmail, userID)
 	if err != nil {
-		return fmt.Errorf("Unable to update user email: %s", err)
+		return fmt.Errorf("Unable to update user email: %w", err)
 	}
 
 	return nil
@@ -337,7 +337,7 @@ func (db *datastore) IsUserSilenced(id int64) (bool, error) {
 		return false, ErrUserNotFound
 	case err != nil:
 		log.Error("Couldn't SELECT user status: %v", err)
-		return false, fmt.Errorf("is user silenced: %v", err)
+		return false, fmt.Errorf("is user silenced: %w", err)
 	}
 
 	return u.IsSilenced(), nil
@@ -469,7 +469,7 @@ func (db *datastore) GetUserDataFromToken(accessToken string) (int64, string, er
 func (db *datastore) GetAPIUser(header string) (*User, error) {
 	uID := db.GetUserID(header)
 	if uID == -1 {
-		return nil, fmt.Errorf(ErrUserNotFound.Error())
+		return nil, ErrUserNotFound
 	}
 	return db.GetUserByID(uID)
 }
@@ -688,7 +688,7 @@ func (db *datastore) CreatePost(userID, collID int64, post *SubmittedPost) (*Pos
 			slug = sql.NullString{id.GenSafeUniqueSlug(slug.String), true}
 			_, err = stmt.Exec(friendlyID, slug, post.Title, post.Content, appearance, post.Language, post.IsRTL, 0, ownerID, ownerCollID, created, 0)
 			if err != nil {
-				return nil, handleFailedPostInsert(fmt.Errorf("Retried slug generation, still failed: %v", err))
+				return nil, handleFailedPostInsert(fmt.Errorf("Retried slug generation, still failed: %w", err))
 			}
 		} else {
 			return nil, handleFailedPostInsert(err)
@@ -750,7 +750,7 @@ func (db *datastore) UpdateOwnedPost(post *AuthenticatedPost, userID int64) erro
 		createTime, err := time.Parse(postMetaDateFormat, *post.Created)
 		if err != nil {
 			log.Error("Unable to parse Created date: %v", err)
-			return fmt.Errorf("That's the incorrect format for Created date.")
+			return errors.New("That's the incorrect format for Created date.")
 		}
 		queryUpdates += sep + "created = ?"
 		sep = ", "
@@ -1316,7 +1316,7 @@ func (db *datastore) AttemptClaim(p *ClaimPostRequest, query string, params []in
 			params[slugIdx] = p.Slug
 			return db.AttemptClaim(p, query, params, slugIdx)
 		}
-		return qRes, fmt.Errorf("attemptClaim: %s", err)
+		return qRes, fmt.Errorf("attemptClaim: %w", err)
 	}
 	return qRes, nil
 }
@@ -2615,7 +2615,7 @@ func (db *datastore) GetUserLastPostTime(id int64) (*time.Time, error) {
 func (db *datastore) SetUserStatus(id int64, status UserStatus) error {
 	_, err := db.Exec("UPDATE users SET status = ? WHERE id = ?", status, id)
 	if err != nil {
-		return fmt.Errorf("failed to update user status: %v", err)
+		return fmt.Errorf("failed to update user status: %w", err)
 	}
 	return nil
 }
