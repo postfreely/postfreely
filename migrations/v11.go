@@ -21,7 +21,9 @@ func widenOauthAcceesToken(db *datastore) error {
 	if db.driverName == dbase.TypeMySQL {
 		t, err := db.Begin()
 		if err != nil {
-			t.Rollback()
+			if t != nil {
+				t.Rollback()
+			}
 			return err
 		}
 

@@ -454,7 +454,7 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 			contentType = "text/markdown"
 		}
 		w.Header().Set("Content-Type", fmt.Sprintf("%s; charset=utf-8", contentType))
-		if isMarkdown && post.Title != "" {
+		if isMarkdown && post != nil && post.Title != "" {
 			fmt.Fprintf(w, "%s\n", post.Title)
 			for i := 1; i <= len(post.Title); i++ {
 				fmt.Fprintf(w, "=")
@@ -632,7 +632,7 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 				return err
 			}
 			coll.hostName = app.cfg.App.Host
-			if coll.OwnerID != u.ID {
+			if u != nil && coll.OwnerID != u.ID {
 				return ErrForbiddenCollection
 			}
 			collID = coll.ID
@@ -754,10 +754,10 @@ func existingPost(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	var pRes *PublicPost
 	pRes, err = app.db.GetPost(p.ID, 0)
+	if err != nil {
+		return err
+	}
 	if reqJSON {
-		if err != nil {
-			return err
-		}
 		pRes.extractData()
 	}
 
@@ -842,7 +842,7 @@ func deletePost(app *App, w http.ResponseWriter, r *http.Request) error {
 			if ownerID == -1 {
 				return ErrBadAccessToken
 			}
-		} else {
+		} else if u != nil {
 			ownerID = u.ID
 		}
 

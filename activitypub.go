@@ -179,6 +179,10 @@ func handleFetchCollectionOutbox(app *App, w http.ResponseWriter, r *http.Reques
 	ocp.OrderedItems = []interface{}{}
 
 	posts, err := app.db.GetPosts(app.cfg, c, p, false, true, false)
+	if err != nil {
+		log.Error("get posts for outbox: %v", err)
+		return ErrPostNotFound
+	}
 	for _, pp := range *posts {
 		pp.Collection = res
 		o := pp.ActivityObject(app)

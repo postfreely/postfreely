@@ -30,6 +30,7 @@ import (
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/data"
 	"github.com/writeas/web-core/log"
+
 	"github.com/postfreely/postfreely/author"
 	"github.com/postfreely/postfreely/config"
 	"github.com/postfreely/postfreely/page"
@@ -202,12 +203,10 @@ func signupWithRegistration(app *App, signup userRegistration, w http.ResponseWr
 
 	var coll *Collection
 	if signup.Monetization != "" {
-		if coll == nil {
-			coll, err = app.db.GetCollection(signup.Alias)
-			if err != nil {
-				log.Error("Unable to get new collection '%s' for monetization on signup: %v", signup.Alias, err)
-				return nil, err
-			}
+		coll, err = app.db.GetCollection(signup.Alias)
+		if err != nil {
+			log.Error("Unable to get new collection '%s' for monetization on signup: %v", signup.Alias, err)
+			return nil, err
 		}
 		err = app.db.SetCollectionAttribute(coll.ID, "monetization_pointer", signup.Monetization)
 		if err != nil {
@@ -920,7 +919,7 @@ func updateSettings(app *App, w http.ResponseWriter, r *http.Request) error {
 		s.Username = ""
 	} else {
 		u, sess = getUserAndSession(app, r)
-		if u == nil {
+		if u == nil || sess == nil {
 			return ErrNotLoggedIn
 		}
 
@@ -968,7 +967,9 @@ func updateSettings(app *App, w http.ResponseWriter, r *http.Request) error {
 
 		if s.IsLogOut {
 			redirectTo = "/me/logout"
-		} else {
+		}
+		// Should never be nil unless reqJSON is true, but just in case:
+		if sess != nil && sess.Values != nil {
 			sess.Values[cookieUserVal] = u.Cookie()
 			addSessionFlash(app, w, r, "Account updated.", nil)
 		}
