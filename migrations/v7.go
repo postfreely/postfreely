@@ -14,23 +14,23 @@ import (
 	"context"
 	"database/sql"
 
-	wf_db "github.com/postfreely/postfreely/db"
+  dbase "github.com/postfreely/postfreely/db"
 )
 
 func oauthAttach(db *datastore) error {
-	dialect := wf_db.DialectMySQL
-	if db.driverName == driverSQLite {
-		dialect = wf_db.DialectSQLite
+	dialect := dbase.DialectMySQL
+	if db.driverName == dbase.TypeSQLite {
+		dialect = dbase.DialectSQLite
 	}
-	return wf_db.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
-		builders := []wf_db.SQLBuilder{
+	return dbase.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
+		builders := []dbase.SQLBuilder{
 			dialect.
 				AlterTable("oauth_client_states").
 				AddColumn(dialect.
 					Column(
 						"attach_user_id",
-						wf_db.ColumnTypeInteger,
-						wf_db.OptionalInt{Set: true, Value: 24}).SetNullable(true)),
+						dbase.ColumnTypeInteger,
+						dbase.OptionalInt{Set: true, Value: 24}).SetNullable(true)),
 		}
 		for _, builder := range builders {
 			query, err := builder.ToSQL()

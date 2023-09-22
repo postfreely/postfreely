@@ -36,6 +36,7 @@ import (
 	"github.com/writeas/web-core/query"
 
 	"github.com/postfreely/postfreely/author"
+  dbase "github.com/postfreely/postfreely/db"
 	"github.com/postfreely/postfreely/config"
 	"github.com/postfreely/postfreely/key"
 )
@@ -45,9 +46,6 @@ const (
 	mySQLErrCollationMix = 1267
 	mySQLErrTooManyConns = 1040
 	mySQLErrMaxUserConns = 1203
-
-	driverMySQL  = "mysql"
-	driverSQLite = "sqlite3"
 )
 
 var (
@@ -152,21 +150,21 @@ type datastore struct {
 var _ writestore = &datastore{}
 
 func (db *datastore) now() string {
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		return "strftime('%Y-%m-%d %H:%M:%S','now')"
 	}
 	return "NOW()"
 }
 
 func (db *datastore) clip(field string, l int) string {
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		return fmt.Sprintf("SUBSTR(%s, 0, %d)", field, l)
 	}
 	return fmt.Sprintf("LEFT(%s, %d)", field, l)
 }
 
 func (db *datastore) upsert(indexedCols ...string) string {
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		// NOTE: SQLite UPSERT syntax only works in v3.24.0 (2018-06-04) or later
 		// Leaving this for whenever we can upgrade and include it in our binary
 		cc := strings.Join(indexedCols, ", ")
@@ -176,7 +174,7 @@ func (db *datastore) upsert(indexedCols ...string) string {
 }
 
 func (db *datastore) dateSub(l int, unit string) string {
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		return fmt.Sprintf("DATETIME('now', '-%d %s')", l, unit)
 	}
 	return fmt.Sprintf("DATE_SUB(NOW(), INTERVAL %d %s)", l, unit)
@@ -661,7 +659,7 @@ func (db *datastore) CreatePost(userID, collID int64, post *SubmittedPost) (*Pos
 	}
 
 	created := time.Now()
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		// SQLite stores datetimes in UTC, so convert time.Now() to it here
 		created = created.UTC()
 	}
@@ -670,7 +668,7 @@ func (db *datastore) CreatePost(userID, collID int64, post *SubmittedPost) (*Pos
 		if err != nil {
 			log.Error("Unable to parse Created time '%s': %v", *post.Created, err)
 			created = time.Now()
-			if db.driverName == driverSQLite {
+			if db.driverName == dbase.TypeSQLite {
 				// SQLite stores datetimes in UTC, so convert time.Now() to it here
 				created = created.UTC()
 			}
@@ -896,7 +894,7 @@ func (db *datastore) UpdateCollection(c *SubmittedCollection, alias string) erro
 
 	// Update MathJax value
 	if c.MathJax {
-		if db.driverName == driverSQLite {
+		if db.driverName == dbase.TypeSQLite {
 			_, err = db.Exec("INSERT OR REPLACE INTO collectionattributes (collection_id, attribute, value) VALUES (?, ?, ?)", collID, "render_mathjax", "1")
 		} else {
 			_, err = db.Exec("INSERT INTO collectionattributes (collection_id, attribute, value) VALUES (?, ?, ?) "+db.upsert("collection_id", "attribute")+" value = ?", collID, "render_mathjax", "1", "1")
@@ -967,7 +965,7 @@ func (db *datastore) UpdateCollection(c *SubmittedCollection, alias string) erro
 			log.Error("Unable to create hash: %s", err)
 			return impart.HTTPError{http.StatusInternalServerError, "Could not create password hash."}
 		}
-		if db.driverName == driverSQLite {
+		if db.driverName == dbase.TypeSQLite {
 			_, err = db.Exec("INSERT OR REPLACE INTO collectionpasswords (collection_id, password) VALUES ((SELECT id FROM collections WHERE alias = ?), ?)", alias, hashedPass)
 		} else {
 			_, err = db.Exec("INSERT INTO collectionpasswords (collection_id, password) VALUES ((SELECT id FROM collections WHERE alias = ?), ?) "+db.upsert("collection_id")+" password = ?", alias, hashedPass, hashedPass)
@@ -1230,7 +1228,7 @@ func (db *datastore) GetPostsTagged(cfg *config.Config, c *Collection, tag strin
 
 	var rows *sql.Rows
 	var err error
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		rows, err = db.Query("SELECT "+postCols+" FROM posts WHERE collection_id = ? AND LOWER(content) regexp ? "+timeCondition+" ORDER BY created "+order+limitStr, collID, `.*#`+strings.ToLower(tag)+`\b.*`)
 	} else {
 		rows, err = db.Query("SELECT "+postCols+" FROM posts WHERE collection_id = ? AND LOWER(content) RLIKE ? "+timeCondition+" ORDER BY created "+order+limitStr, collID, "#"+strings.ToLower(tag)+"[[:>:]]")
@@ -2549,7 +2547,7 @@ func (db *datastore) GetDynamicContent(id string) (*instanceContent, error) {
 
 func (db *datastore) UpdateDynamicContent(id, title, content, contentType string) error {
 	var err error
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		_, err = db.Exec("INSERT OR REPLACE INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?)", id, title, content, contentType)
 	} else {
 		_, err = db.Exec("INSERT INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?) "+db.upsert("id")+" title = ?, content = ?, updated = "+db.now(), id, title, content, contentType, title, content)
@@ -2680,7 +2678,7 @@ func (db *datastore) ValidateOAuthState(ctx context.Context, state string) (stri
 
 func (db *datastore) RecordRemoteUserID(ctx context.Context, localUserID int64, remoteUserID, provider, clientID, accessToken string) error {
 	var err error
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		_, err = db.ExecContext(ctx, "INSERT OR REPLACE INTO oauth_users (user_id, remote_user_id, provider, client_id, access_token) VALUES (?, ?, ?, ?, ?)", localUserID, remoteUserID, provider, clientID, accessToken)
 	} else {
 		_, err = db.ExecContext(ctx, "INSERT INTO oauth_users (user_id, remote_user_id, provider, client_id, access_token) VALUES (?, ?, ?, ?, ?) "+db.upsert("user")+" access_token = ?", localUserID, remoteUserID, provider, clientID, accessToken, accessToken)
@@ -2739,7 +2737,7 @@ func (db *datastore) GetOauthAccounts(ctx context.Context, userID int64) ([]oaut
 func (db *datastore) DatabaseInitialized() bool {
 	var dummy string
 	var err error
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'users'").Scan(&dummy)
 	} else {
 		err = db.QueryRow("SHOW TABLES LIKE 'users'").Scan(&dummy)

@@ -20,6 +20,8 @@ import (
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"golang.org/x/net/idna"
+
+	"github.com/writefreely/writefreely/db"
 )
 
 const (
@@ -36,7 +38,7 @@ type (
 	// ServerCfg holds values that affect how the HTTP server runs
 	ServerCfg struct {
 		HiddenHost string `ini:"hidden_host"`
-		Port       int    `ini:"port"`
+		WWWPort    int    `ini:"port"`
 		Bind       string `ini:"bind"`
 
 		TLSCertPath string `ini:"tls_cert_path"`
@@ -197,8 +199,9 @@ type (
 func New() *Config {
 	c := &Config{
 		Server: ServerCfg{
-			Port: 8080,
+			WWWPort: 8080,
 			Bind: "localhost", /* IPV6 support when not using localhost? */
+			GopherPort: 7007,
 		},
 		App: AppCfg{
 			Host:           "http://localhost:8080",
@@ -217,7 +220,7 @@ func New() *Config {
 
 // UseMySQL resets the Config's Database to use default values for a MySQL setup.
 func (cfg *Config) UseMySQL(fresh bool) {
-	cfg.Database.Type = "mysql"
+	cfg.Database.Type = db.TypeMySQL
 	if fresh {
 		cfg.Database.Host = "localhost"
 		cfg.Database.Port = 3306
@@ -226,16 +229,16 @@ func (cfg *Config) UseMySQL(fresh bool) {
 
 // UseSQLite resets the Config's Database to use default values for a SQLite setup.
 func (cfg *Config) UseSQLite(fresh bool) {
-	cfg.Database.Type = "sqlite3"
+	cfg.Database.Type = db.TypeSQLite
 	if fresh {
-		cfg.Database.FileName = "writefreely.db"
+		cfg.Database.FileName = "postfreely.db"
 	}
 }
 
 // IsSecureStandalone returns whether or not the application is running as a
 // standalone server with TLS enabled.
 func (cfg *Config) IsSecureStandalone() bool {
-	return cfg.Server.Port == 443 && cfg.Server.TLSCertPath != "" && cfg.Server.TLSKeyPath != ""
+	return cfg.Server.WWWPort == 443 && cfg.Server.TLSCertPath != "" && cfg.Server.TLSKeyPath != ""
 }
 
 func (ac *AppCfg) LandingPath() string {

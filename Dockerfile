@@ -37,6 +37,7 @@ COPY --from=build --chown=daemon:daemon /stage /go
 WORKDIR /go
 VOLUME /go/keys
 EXPOSE 8080
+EXPOSE 7007
 USER daemon
 
 ENTRYPOINT ["cmd/postfreely/postfreely"]
