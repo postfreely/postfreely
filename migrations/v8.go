@@ -14,19 +14,19 @@ import (
 	"context"
 	"database/sql"
 
-	wf_db "github.com/writefreely/writefreely/db"
+  dbase "github.com/postfreely/postfreely/db"
 )
 
 func oauthInvites(db *datastore) error {
-	dialect := wf_db.DialectMySQL
-	if db.driverName == driverSQLite {
-		dialect = wf_db.DialectSQLite
+	dialect := dbase.DialectMySQL
+	if db.driverName == dbase.TypeSQLite {
+		dialect = dbase.DialectSQLite
 	}
-	return wf_db.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
-		builders := []wf_db.SQLBuilder{
+	return dbase.RunTransactionWithOptions(context.Background(), db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
+		builders := []dbase.SQLBuilder{
 			dialect.
 				AlterTable("oauth_client_states").
-				AddColumn(dialect.Column("invite_code", wf_db.ColumnTypeChar, wf_db.OptionalInt{
+				AddColumn(dialect.Column("invite_code", dbase.ColumnTypeChar, dbase.OptionalInt{
 					Set:   true,
 					Value: 6,
 				}).SetNullable(true)),

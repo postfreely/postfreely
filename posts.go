@@ -38,8 +38,8 @@ import (
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/tags"
 
-	"github.com/writefreely/writefreely/page"
-	"github.com/writefreely/writefreely/parse"
+	"github.com/postfreely/postfreely/page"
+	"github.com/postfreely/postfreely/parse"
 )
 
 const (

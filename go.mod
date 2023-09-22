@@ -1,4 +1,4 @@
-module github.com/writefreely/writefreely
+module github.com/postfreely/postfreely
 
 go 1.19
 

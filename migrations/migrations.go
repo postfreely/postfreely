@@ -15,6 +15,8 @@ import (
 	"database/sql"
 
 	"github.com/writeas/web-core/log"
+
+	dbase "github.com/writefreely/writefreely/db"
 )
 
 // TODO: refactor to use the datastore struct from writefreely pkg
@@ -26,12 +28,6 @@ type datastore struct {
 func NewDatastore(db *sql.DB, dn string) *datastore {
 	return &datastore{db, dn}
 }
-
-// TODO: use these consts from writefreely pkg
-const (
-	driverMySQL  = "mysql"
-	driverSQLite = "sqlite3"
-)
 
 type Migration interface {
 	Description() string
@@ -129,7 +125,7 @@ func Migrate(db *datastore) error {
 func (db *datastore) tableExists(t string) bool {
 	var dummy string
 	var err error
-	if db.driverName == driverSQLite {
+	if db.driverName == dbase.TypeSQLite {
 		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", t).Scan(&dummy)
 	} else {
 		err = db.QueryRow("SHOW TABLES LIKE '" + t + "'").Scan(&dummy)

@@ -24,8 +24,8 @@ import (
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/passgen"
-	"github.com/writefreely/writefreely/appstats"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/appstats"
+	"github.com/postfreely/postfreely/config"
 )
 
 var (

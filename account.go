@@ -30,9 +30,9 @@ import (
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/data"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/author"
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/page"
+	"github.com/postfreely/postfreely/author"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/page"
 )
 
 type (
