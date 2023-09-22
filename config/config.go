@@ -229,7 +229,7 @@ func (cfg *Config) UseMySQL(fresh bool) {
 func (cfg *Config) UseSQLite(fresh bool) {
 	cfg.Database.Type = "sqlite3"
 	if fresh {
-		cfg.Database.FileName = "writefreely.db"
+		cfg.Database.FileName = "postfreely.db"
 	}
 }
 
