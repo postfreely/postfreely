@@ -12,7 +12,7 @@
 package page
 
 import (
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 	"strings"
 )
 

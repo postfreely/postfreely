@@ -24,7 +24,7 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 )
 
 // OAuthButtons holds display information for different OAuth providers we support.

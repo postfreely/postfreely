@@ -21,7 +21,7 @@ import (
 
 	"github.com/writeas/web-core/silobridge"
 
-	wf_db "github.com/writefreely/writefreely/db"
+	wf_db "github.com/postfreely/postfreely/db"
 
 	"github.com/guregu/null"
 	"github.com/guregu/null/zero"
@@ -35,10 +35,10 @@ import (
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/query"
 
-	"github.com/writefreely/writefreely/author"
-	dbase "github.com/writefreely/writefreely/db"
-	"github.com/writefreely/writefreely/config"
-	"github.com/writefreely/writefreely/key"
+	"github.com/postfreely/postfreely/author"
+  dbase "github.com/postfreely/postfreely/db"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/key"
 )
 
 const (

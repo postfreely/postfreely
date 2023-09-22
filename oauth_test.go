@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/id"
-	"github.com/writefreely/writefreely/config"
+	"github.com/postfreely/postfreely/config"
 	"net/http"
 	"net/http/httptest"
 	"net/url"

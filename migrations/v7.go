@@ -14,7 +14,7 @@ import (
 	"context"
 	"database/sql"
 
-	dbase "github.com/writefreely/writefreely/db"
+  dbase "github.com/postfreely/postfreely/db"
 )
 
 func oauthAttach(db *datastore) error {

@@ -12,7 +12,7 @@ package writefreely
 
 import (
 	"github.com/writeas/web-core/log"
-	"github.com/writefreely/writefreely/key"
+	"github.com/postfreely/postfreely/key"
 	"os"
 	"path/filepath"
 )
