@@ -15,7 +15,6 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
@@ -186,12 +185,4 @@ func legacyActions(c *cli.Context) error {
 	writefreely.Serve(app, r)
 
 	return nil
-}
-
-func parseCredentials(credentialString string) (string, string, error) {
-	creds := strings.Split(credentialString, ":")
-	if len(creds) != 2 {
-		return "", "", fmt.Errorf("invalid format for passed credentials, must be username:password")
-	}
-	return creds[0], creds[1], nil
 }
