@@ -16,10 +16,11 @@ package writefreely
 import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/writeas/web-core/log"
+  dbase "github.com/postfreely/postfreely/db"
 )
 
 func (db *datastore) isDuplicateKeyErr(err error) bool {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrDuplicateKey
 		}
@@ -31,7 +32,7 @@ func (db *datastore) isDuplicateKeyErr(err error) bool {
 }
 
 func (db *datastore) isIgnorableError(err error) bool {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrCollationMix
 		}
@@ -43,7 +44,7 @@ func (db *datastore) isIgnorableError(err error) bool {
 }
 
 func (db *datastore) isHighLoadError(err error) bool {
-	if db.driverName == driverMySQL {
+	if db.driverName == dbase.TypeMySQL {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {
 			return mysqlErr.Number == mySQLErrMaxUserConns || mysqlErr.Number == mySQLErrTooManyConns
 		}
