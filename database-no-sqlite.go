@@ -1,5 +1,4 @@
 //go:build !sqlite && !wflib
-// +build !sqlite,!wflib
 
 /*
  * Copyright © 2019-2020 Musing Studio LLC.
@@ -15,8 +14,9 @@ package postfreely
 
 import (
 	"github.com/go-sql-driver/mysql"
-	dbase "github.com/postfreely/postfreely/db"
 	"github.com/writeas/web-core/log"
+
+	dbase "github.com/postfreely/postfreely/db"
 )
 
 func (db *datastore) isDuplicateKeyErr(err error) bool {

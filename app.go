@@ -154,7 +154,7 @@ func (app *App) LoadConfig() error {
 		log.Error("Unable to load configuration: %v", err)
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Error("Have you created the config file yet? If not, run —")
-			var cmdname string = assumedExecutableName
+			var cmdname = assumedExecutableName
 			if s, err := os.Executable(); nil == err {
 				cmdname = s
 			}
@@ -957,7 +957,7 @@ func adminInitDatabase(app *App) error {
 
 	tblReg := regexp.MustCompile("CREATE TABLE (IF NOT EXISTS )?`([a-z_]+)`")
 
-	queries := strings.Split(string(schema), ";\n")
+	queries := strings.Split(schema, ";\n")
 	for _, q := range queries {
 		if strings.TrimSpace(q) == "" {
 			continue

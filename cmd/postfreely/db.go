@@ -11,12 +11,13 @@
 package main
 
 import (
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
+
+	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdDB cli.Command = cli.Command{
+	cmdDB = cli.Command{
 		Name:  "db",
 		Usage: "db management tools",
 		Subcommands: []*cli.Command{
@@ -25,13 +26,13 @@ var (
 		},
 	}
 
-	cmdDBInit cli.Command = cli.Command{
+	cmdDBInit = cli.Command{
 		Name:   "init",
 		Usage:  "Initialize Database",
 		Action: initDBAction,
 	}
 
-	cmdDBMigrate cli.Command = cli.Command{
+	cmdDBMigrate = cli.Command{
 		Name:   "migrate",
 		Usage:  "Migrate Database",
 		Action: migrateDBAction,

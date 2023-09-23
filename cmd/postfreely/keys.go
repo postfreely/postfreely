@@ -11,12 +11,13 @@
 package main
 
 import (
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
+
+	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdKeys cli.Command = cli.Command{
+	cmdKeys = cli.Command{
 		Name:  "keys",
 		Usage: "key management tools",
 		Subcommands: []*cli.Command{
@@ -24,7 +25,7 @@ var (
 		},
 	}
 
-	cmdGenerateKeys cli.Command = cli.Command{
+	cmdGenerateKeys = cli.Command{
 		Name:    "generate",
 		Aliases: []string{"gen"},
 		Usage:   "Generate encryption and authentication keys",

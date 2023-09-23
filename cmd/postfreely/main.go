@@ -17,9 +17,10 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
+
+	"github.com/postfreely/postfreely"
 )
 
 const (
@@ -125,7 +126,7 @@ func main() {
 		log.Error(err.Error())
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Error("Have you generated the keys yet? If not, run —")
-			var cmdname string = assumedExecutableName
+			var cmdname = assumedExecutableName
 			if s, err := os.Executable(); nil == err {
 				cmdname = s
 			}
