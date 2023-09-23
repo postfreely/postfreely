@@ -17,7 +17,9 @@ import (
 func optimizeDrafts(db *datastore) error {
 	t, err := db.Begin()
 	if err != nil {
-		t.Rollback()
+		if t != nil {
+			t.Rollback()
+		}
 		return err
 	}
 
