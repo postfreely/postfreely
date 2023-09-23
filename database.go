@@ -36,8 +36,8 @@ import (
 	"github.com/writeas/web-core/query"
 
 	"github.com/postfreely/postfreely/author"
-  dbase "github.com/postfreely/postfreely/db"
 	"github.com/postfreely/postfreely/config"
+	dbase "github.com/postfreely/postfreely/db"
 	"github.com/postfreely/postfreely/key"
 )
 
@@ -1356,13 +1356,14 @@ func (db *datastore) DispersePosts(userID int64, postIDs []string) (*[]ClaimPost
 			} else {
 				log.Error("Error getting post in dispersePosts: %v", err)
 			}
-		}
-		if fullPost.OwnerID.Int64 != userID {
-			r.Code = http.StatusConflict
-			r.ErrorMessage = "Post is already owned by someone else."
-			r.ID = postID
-			res = append(res, r)
-			continue
+		} else {
+			if fullPost.OwnerID.Int64 != userID {
+				r.Code = http.StatusConflict
+				r.ErrorMessage = "Post is already owned by someone else."
+				r.ID = postID
+				res = append(res, r)
+				continue
+			}
 		}
 
 		var qRes sql.Result
@@ -1541,13 +1542,14 @@ func (db *datastore) ClaimPosts(cfg *config.Config, userID int64, collAlias stri
 				res = append(res, r)
 				continue
 			}
-		}
-		if fullPost.OwnerID.Int64 != userID {
-			r.Code = http.StatusConflict
-			r.ErrorMessage = "Post is already owned by someone else."
-			r.ID = p.ID
-			res = append(res, r)
-			continue
+		} else {
+			if fullPost.OwnerID.Int64 != userID {
+				r.Code = http.StatusConflict
+				r.ErrorMessage = "Post is already owned by someone else."
+				r.ID = p.ID
+				res = append(res, r)
+				continue
+			}
 		}
 
 		// Post was successfully claimed

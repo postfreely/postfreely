@@ -41,8 +41,8 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/postfreely/postfreely/author"
-  dbase "github.com/postfreely/postfreely/db"
 	"github.com/postfreely/postfreely/config"
+	dbase "github.com/postfreely/postfreely/db"
 	"github.com/postfreely/postfreely/key"
 	"github.com/postfreely/postfreely/migrations"
 	"github.com/postfreely/postfreely/page"
@@ -55,8 +55,8 @@ const (
 	assumedTitleLen = 80
 	postsPerPage    = 10
 
-	serverSoftware = "PostFreely"
-	softwareURL    = "http://postfreely.org/"
+	serverSoftware  = "PostFreely"
+	softwareURL     = "http://postfreely.org/"
 	softwareCodeURL = "https://github.com/postfreely/postfreely"
 )
 
@@ -393,7 +393,7 @@ func pageForReq(app *App, r *http.Request) page.StaticPage {
 		u = getUserSession(app, r)
 		if u != nil {
 			p.Username = u.Username
-			p.IsAdmin = u != nil && u.IsAdmin()
+			p.IsAdmin = u.IsAdmin()
 			p.CanInvite = canUserInvite(app.cfg, p.IsAdmin)
 		}
 	}
@@ -839,7 +839,9 @@ func connectToDatabase(app *App) {
 	var err error
 	if app.cfg.Database.Type == dbase.TypeMySQL {
 		db, err = sql.Open(app.cfg.Database.Type, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=%s&tls=%t", app.cfg.Database.User, app.cfg.Database.Password, app.cfg.Database.Host, app.cfg.Database.Port, app.cfg.Database.Database, url.QueryEscape(time.Local.String()), app.cfg.Database.TLS))
-		db.SetMaxOpenConns(50)
+		if err == nil {
+			db.SetMaxOpenConns(50)
+		}
 	} else if app.cfg.Database.Type == dbase.TypeSQLite {
 		if !SQLiteEnabled {
 			log.Error("Invalid database type '%s'. Binary wasn't compiled with SQLite3 support.", app.cfg.Database.Type)
@@ -850,7 +852,9 @@ func connectToDatabase(app *App) {
 			os.Exit(1)
 		}
 		db, err = sql.Open("sqlite", app.cfg.Database.FileName+"?parseTime=true&cached=shared")
-		db.SetMaxOpenConns(2)
+		if err == nil {
+			db.SetMaxOpenConns(2)
+		}
 	} else {
 		log.Error("Invalid database type %q. Only %q and %q are supported right now.", app.cfg.Database.Type, dbase.TypeMySQL, dbase.TypeSQLite)
 		os.Exit(1)
