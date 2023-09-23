@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"fmt"
@@ -21,11 +21,11 @@ import (
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/postfreely/postfreely/config"
+	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
 	"github.com/writefreely/go-gopher"
-	"github.com/postfreely/postfreely/config"
-	"github.com/postfreely/postfreely/page"
 )
 
 // UserLevel represents the required user level for accessing an endpoint

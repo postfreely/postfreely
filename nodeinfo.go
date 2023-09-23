@@ -8,12 +8,12 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
+	"github.com/postfreely/postfreely/config"
 	"github.com/writeas/web-core/log"
 	"github.com/writefreely/go-nodeinfo"
-	"github.com/postfreely/postfreely/config"
 	"strings"
 )
 

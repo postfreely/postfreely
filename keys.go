@@ -8,11 +8,11 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
-	"github.com/writeas/web-core/log"
 	"github.com/postfreely/postfreely/key"
+	"github.com/writeas/web-core/log"
 	"os"
 	"path/filepath"
 )

@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql"
@@ -20,12 +20,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/postfreely/postfreely/appstats"
+	"github.com/postfreely/postfreely/config"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/passgen"
-	"github.com/postfreely/postfreely/appstats"
-	"github.com/postfreely/postfreely/config"
 )
 
 var (

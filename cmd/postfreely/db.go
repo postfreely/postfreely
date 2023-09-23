@@ -11,8 +11,8 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
 	"github.com/postfreely/postfreely"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -39,11 +39,11 @@ var (
 )
 
 func initDBAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.CreateSchema(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.CreateSchema(app)
 }
 
 func migrateDBAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.Migrate(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.Migrate(app)
 }

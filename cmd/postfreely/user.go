@@ -13,8 +13,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/urfave/cli/v2"
 	"github.com/postfreely/postfreely"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -67,8 +67,8 @@ func addUserAction(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.CreateUser(app, username, password, c.Bool("admin"))
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.CreateUser(app, username, password, c.Bool("admin"))
 }
 
 func delUserAction(c *cli.Context) error {
@@ -76,8 +76,8 @@ func delUserAction(c *cli.Context) error {
 		return fmt.Errorf("No user passed. Example: writefreely user delete [USER]")
 	}
 	username := c.Args().Get(0)
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.DoDeleteAccount(app, username)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.DoDeleteAccount(app, username)
 }
 
 func resetPassAction(c *cli.Context) error {
@@ -85,6 +85,6 @@ func resetPassAction(c *cli.Context) error {
 		return fmt.Errorf("No user passed. Example: writefreely user reset-pass [USER]")
 	}
 	username := c.Args().Get(0)
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.ResetPassword(app, username)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.ResetPassword(app, username)
 }

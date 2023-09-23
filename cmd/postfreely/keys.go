@@ -11,8 +11,8 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
 	"github.com/postfreely/postfreely"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -33,6 +33,6 @@ var (
 )
 
 func genKeysAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.GenerateKeyFiles(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.GenerateKeyFiles(app)
 }
