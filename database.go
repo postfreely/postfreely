@@ -53,14 +53,14 @@ var (
 )
 
 type writestore interface {
-	CreateUser(*config.Config, *User, string, string) error
+	CreateUser(cfg *config.Config, u *User, collectionTitle string, collectionDesc string) error
 	UpdateUserEmail(keys *key.Keychain, userID int64, email string) error
-	UpdateEncryptedUserEmail(int64, []byte) error
-	GetUserByID(int64) (*User, error)
-	GetUserForAuth(string) (*User, error)
-	GetUserForAuthByID(int64) (*User, error)
-	GetUserNameFromToken(string) (string, error)
-	GetUserDataFromToken(string) (int64, string, error)
+	UpdateEncryptedUserEmail(userID int64, encEmail []byte) error
+	GetUserByID(userID int64) (*User, error)
+	GetUserForAuth(username string) (*User, error)
+	GetUserForAuthByID(userID int64) (*User, error)
+	GetUserNameFromToken(accessToken string) (string, error)
+	GetUserDataFromToken(accessToken string) (int64, string, error)
 	GetAPIUser(header string) (*User, error)
 	GetUserID(accessToken string) int64
 	GetUserIDPrivilege(accessToken string) (userID int64, sudo bool)
@@ -85,28 +85,28 @@ type writestore interface {
 	CreateOwnedPost(post *SubmittedPost, accessToken, collAlias, hostName string) (*PublicPost, error)
 	CreatePost(userID, collID int64, post *SubmittedPost) (*Post, error)
 	UpdateOwnedPost(post *AuthenticatedPost, userID int64) error
-	GetEditablePost(id, editToken string) (*PublicPost, error)
-	PostIDExists(id string) bool
-	GetPost(id string, collectionID int64) (*PublicPost, error)
-	GetOwnedPost(id string, ownerID int64) (*PublicPost, error)
-	GetPostProperty(id string, collectionID int64, property string) (interface{}, error)
+	GetEditablePost(postID, editToken string) (*PublicPost, error)
+	PostIDExists(postID string) bool
+	GetPost(postID string, collectionID int64) (*PublicPost, error)
+	GetOwnedPost(postID string, ownerID int64) (*PublicPost, error)
+	GetPostProperty(postID string, collectionID int64, property string) (interface{}, error)
 
-	CreateCollectionFromToken(*config.Config, string, string, string) (*Collection, error)
-	CreateCollection(*config.Config, string, string, int64) (*Collection, error)
+	CreateCollectionFromToken(cfg *config.Config, alias, title, accessToken string) (*Collection, error)
+	CreateCollection(cfg *config.Config, alias, title string, userID int64) (*Collection, error)
 	GetCollectionBy(condition string, value interface{}) (*Collection, error)
 	GetCollection(alias string) (*Collection, error)
 	GetCollectionForPad(alias string) (*Collection, error)
-	GetCollectionByID(id int64) (*Collection, error)
+	GetCollectionByID(collectionID int64) (*Collection, error)
 	UpdateCollection(c *SubmittedCollection, alias string) error
 	DeleteCollection(alias string, userID int64) error
 
 	UpdatePostPinState(pinned bool, postID string, collID, ownerID, pos int64) error
-	GetLastPinnedPostPos(collID int64) int64
+	GetLastPinnedPostPos(collectionID int64) int64
 	GetPinnedPosts(coll *CollectionObj, includeFuture bool) (*[]PublicPost, error)
 	RemoveCollectionRedirect(t *sql.Tx, alias string) error
 	GetCollectionRedirect(alias string) (new string)
-	IsCollectionAttributeOn(id int64, attr string) bool
-	CollectionHasAttribute(id int64, attr string) bool
+	IsCollectionAttributeOn(collectionID int64, attr string) bool
+	CollectionHasAttribute(collectionID int64, attr string) bool
 
 	CanCollect(cpr *ClaimPostRequest, userID int64) bool
 	AttemptClaim(p *ClaimPostRequest, query string, params []interface{}, slugIdx int) (sql.Result, error)
@@ -119,23 +119,23 @@ type writestore interface {
 
 	GetAPFollowers(c *Collection) (*[]RemoteUser, error)
 	GetAPActorKeys(collectionID int64) ([]byte, []byte)
-	CreateUserInvite(id string, userID int64, maxUses int, expires *time.Time) error
+	CreateUserInvite(inviteID string, userID int64, maxUses int, expires *time.Time) error
 	GetUserInvites(userID int64) (*[]Invite, error)
-	GetUserInvite(id string) (*Invite, error)
-	GetUsersInvitedCount(id string) int64
+	GetUserInvite(inviteID string) (*Invite, error)
+	GetUsersInvitedCount(inviteID string) int64
 	CreateInvitedUser(inviteID string, userID int64) error
 
-	GetDynamicContent(id string) (*instanceContent, error)
-	UpdateDynamicContent(id, title, content, contentType string) error
+	GetDynamicContent(contentID string) (*instanceContent, error)
+	UpdateDynamicContent(contentID, title, content, contentType string) error
 	GetAllUsers(page uint) (*[]User, error)
 	GetAllUsersCount() int64
-	GetUserLastPostTime(id int64) (*time.Time, error)
-	GetCollectionLastPostTime(id int64) (*time.Time, error)
+	GetUserLastPostTime(userID int64) (*time.Time, error)
+	GetCollectionLastPostTime(collectionID int64) (*time.Time, error)
 
-	GetIDForRemoteUser(context.Context, string, string, string) (int64, error)
-	RecordRemoteUserID(context.Context, int64, string, string, string, string) error
-	ValidateOAuthState(context.Context, string) (string, string, int64, string, error)
-	GenerateOAuthState(context.Context, string, string, int64, string) (string, error)
+	GetIDForRemoteUser(ctx context.Context, remoteUserID, provider, clientID string) (int64, error)
+	RecordRemoteUserID(ctx context.Context, localUserID int64, remoteUserID, provider, clientID, accessToken string) error
+	ValidateOAuthState(ctx context.Context, state string) (string, string, int64, string, error)
+	GenerateOAuthState(ctx context.Context, provider string, clientID string, attachUser int64, inviteCode string) (string, error)
 	GetOauthAccounts(ctx context.Context, userID int64) ([]oauthAccountInfo, error)
 	RemoveOauth(ctx context.Context, userID int64, provider string, clientID string, remoteUserID string) error
 
@@ -1590,9 +1590,9 @@ func (db *datastore) UpdatePostPinState(pinned bool, postID string, collID, owne
 	return nil
 }
 
-func (db *datastore) GetLastPinnedPostPos(collID int64) int64 {
+func (db *datastore) GetLastPinnedPostPos(collectionID int64) int64 {
 	var lastPos sql.NullInt64
-	err := db.QueryRow("SELECT MAX(pinned_position) FROM posts WHERE collection_id = ? AND pinned_position IS NOT NULL", collID).Scan(&lastPos)
+	err := db.QueryRow("SELECT MAX(pinned_position) FROM posts WHERE collection_id = ? AND pinned_position IS NOT NULL", collectionID).Scan(&lastPos)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return -1
