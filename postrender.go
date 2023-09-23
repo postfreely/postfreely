@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"bytes"
@@ -23,7 +23,6 @@ import (
 	"unicode"
 	"unicode/utf8"
 
-	hashtag "go.abhg.dev/goldmark/hashtag"
 	"github.com/microcosm-cc/bluemonday"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
@@ -32,6 +31,7 @@ import (
 	"github.com/writeas/web-core/stringmanip"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/parser"
+	hashtag "go.abhg.dev/goldmark/hashtag"
 
 	"github.com/postfreely/postfreely/config"
 	"github.com/postfreely/postfreely/parse"

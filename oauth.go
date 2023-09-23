@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"context"
@@ -22,9 +22,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
+	"github.com/postfreely/postfreely/config"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely/config"
 )
 
 // OAuthButtons holds display information for different OAuth providers we support.

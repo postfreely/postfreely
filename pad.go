@@ -8,16 +8,16 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely/page"
 )
 
 func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {

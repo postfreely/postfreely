@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 // AuthenticateUser ensures a user with the given accessToken is valid. Call
 // it before any operations that require authentication or optionally associate

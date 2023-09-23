@@ -8,15 +8,15 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"errors"
 	"fmt"
 	"html/template"
 	"io"
-	"os"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 

@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql"
@@ -21,11 +21,11 @@ import (
 
 	. "github.com/gorilla/feeds"
 	"github.com/gorilla/mux"
+	"github.com/postfreely/postfreely/page"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/memo"
-	"github.com/postfreely/postfreely/page"
 )
 
 const (

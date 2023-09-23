@@ -1,4 +1,4 @@
-package writefreely
+package postfreely
 
 import (
 	"testing"

@@ -12,9 +12,9 @@ package main
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely"
 )
 
 var (
@@ -28,21 +28,21 @@ var (
 
 func serveAction(c *cli.Context) error {
 	// Initialize the application
-	app := writefreely.NewApp(c.String("c"))
+	app := postfreely.NewApp(c.String("c"))
 	var err error
-	log.Info("Starting %s...", writefreely.FormatVersion())
-	app, err = writefreely.Initialize(app, c.Bool("debug"))
+	log.Info("Starting %s...", postfreely.FormatVersion())
+	app, err = postfreely.Initialize(app, c.Bool("debug"))
 	if err != nil {
 		return err
 	}
 
 	// Set app routes
 	r := mux.NewRouter()
-	writefreely.InitRoutes(app, r)
+	postfreely.InitRoutes(app, r)
 	app.InitStaticRoutes(r)
 
 	// Serve the application
-	writefreely.Serve(app, r)
+	postfreely.Serve(app, r)
 
 	return nil
 }

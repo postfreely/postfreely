@@ -8,19 +8,19 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely_test
+package postfreely_test
 
 import (
 	"testing"
 
 	"github.com/guregu/null/zero"
-	"github.com/stretchr/testify/assert"
 	"github.com/postfreely/postfreely"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPostSummary(t *testing.T) {
 	testCases := map[string]struct {
-		given    writefreely.Post
+		given    postfreely.Post
 		expected string
 	}{
 		"no special chars":          {givenPost("Content."), "Content."},
@@ -40,6 +40,6 @@ lines.`), "Content in multiple lines."},
 	}
 }
 
-func givenPost(content string) writefreely.Post {
-	return writefreely.Post{Title: zero.StringFrom("Title"), Content: content}
+func givenPost(content string) postfreely.Post {
+	return postfreely.Post{Title: zero.StringFrom("Title"), Content: content}
 }

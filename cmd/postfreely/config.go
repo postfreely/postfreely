@@ -11,8 +11,8 @@
 package main
 
 import (
-	"github.com/urfave/cli/v2"
 	"github.com/postfreely/postfreely"
+	"github.com/urfave/cli/v2"
 )
 
 var (
@@ -49,12 +49,12 @@ var (
 )
 
 func genConfigAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.CreateConfig(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.CreateConfig(app)
 }
 
 func interactiveConfigAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	writefreely.DoConfig(app, c.String("sections"))
+	app := postfreely.NewApp(c.String("c"))
+	postfreely.DoConfig(app, c.String("sections"))
 	return nil
 }
