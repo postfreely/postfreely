@@ -154,7 +154,7 @@ func (app *App) LoadConfig() error {
 		log.Error("Unable to load configuration: %v", err)
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Error("Have you created the config file yet? If not, run —")
-			var cmdname string = assumedExecutableName
+			var cmdname = assumedExecutableName
 			if s, err := os.Executable(); nil == err {
 				cmdname = s
 			}
@@ -948,16 +948,16 @@ var schemaSql string
 var sqliteSql string
 
 func adminInitDatabase(app *App) error {
-	var schema string
+	var dbschema string
 	if app.cfg.Database.Type == dbase.TypeSQLite {
-		schema = sqliteSql
+		dbschema = sqliteSql
 	} else {
-		schema = schemaSql
+		dbschema = schemaSql
 	}
 
 	tblReg := regexp.MustCompile("CREATE TABLE (IF NOT EXISTS )?`([a-z_]+)`")
 
-	queries := strings.Split(string(schema), ";\n")
+	queries := strings.Split(dbschema, ";\n")
 	for _, q := range queries {
 		if strings.TrimSpace(q) == "" {
 			continue
