@@ -414,6 +414,12 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	// Load templates
 	err := InitTemplates(apper.App().Config())
 	if err != nil {
+		log.Error("Have you unpacked the template files? If not, run —")
+		cmdname := assumedExecutableName
+		if s, err := os.Executable(); nil == err {
+			cmdname = s
+		}
+		log.Error("\t%s templates generate", cmdname)
 		return nil, fmt.Errorf("load templates: %w", err)
 	}
 

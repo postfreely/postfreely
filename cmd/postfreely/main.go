@@ -17,9 +17,10 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
+
+	"github.com/postfreely/postfreely"
 )
 
 const (
@@ -116,6 +117,7 @@ func main() {
 		&cmdUser,
 		&cmdDB,
 		&cmdConfig,
+		&cmdTemplates,
 		&cmdKeys,
 		&cmdServe,
 	}
