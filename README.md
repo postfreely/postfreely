@@ -38,6 +38,24 @@ Blog elements are localized in 20+ languages, and PostFreely includes first-clas
 
 PostFreely collects minimal data, and never publicizes more than a writer consents to. Writers can seamlessly create multiple blogs from a single account for different pen names or purposes without publicly revealing their association.
 
+## Building
+
+In the main project directory, run:
+
+```
+% go build ./cmd/postfreely
+```
+
+A `postfreely` binary will be generated in the current directory.
+
+The Makefile is no longer needed and will eventually be removed.
+
+To run tests:
+
+```
+% go test ./...
+```
+
 ## Contributing
 
 We gladly welcome contributions to PostFreely, whether in the form of [code](CONTRIBUTING.md#contributing-to-postfreely), bug reports, feature requests, translations, or documentation improvements.
