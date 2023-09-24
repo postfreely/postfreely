@@ -11,10 +11,12 @@
 package postfreely
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"html/template"
 	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -52,6 +54,52 @@ const (
 	templatesDir = "templates"
 	pagesDir     = "pages"
 )
+
+//go:embed templates
+var templatesFS embed.FS
+
+//go:embed pages
+var pagesFS embed.FS
+
+//go:embed static
+var staticFS embed.FS
+
+func UnpackTemplates() error {
+	return errors.Join(
+		unpackFS(templatesFS, templatesDir),
+		unpackFS(pagesFS, pagesDir),
+		unpackFS(staticFS, staticDir),
+	)
+}
+
+func unpackFS(someFS embed.FS, destPath string) error {
+	return fs.WalkDir(someFS, ".", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		return unpackTemplate(someFS, path, d)
+	})
+}
+
+func unpackTemplate(someFS embed.FS, path string, d fs.DirEntry) error {
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		if path == "." {
+			return nil
+		}
+		if d.IsDir() {
+			log.Info("creating directory %s", path)
+			return os.MkdirAll(path, 0700)
+		}
+		data, err := someFS.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		log.Info("creating file      %s", path)
+		return os.WriteFile(path, data, 0600)
+	}
+	log.Info("leaving existing   %s", path)
+	return nil
+}
 
 func showUserPage(w http.ResponseWriter, name string, obj interface{}) {
 	if obj == nil {

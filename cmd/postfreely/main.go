@@ -117,6 +117,7 @@ func main() {
 		&cmdUser,
 		&cmdDB,
 		&cmdConfig,
+		&cmdTemplates,
 		&cmdKeys,
 		&cmdServe,
 	}
