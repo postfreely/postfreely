@@ -13,12 +13,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
+
+	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdUser cli.Command = cli.Command{
+	cmdUser = cli.Command{
 		Name:  "user",
 		Usage: "user management tools",
 		Subcommands: []*cli.Command{
@@ -29,7 +30,7 @@ var (
 		},
 	}
 
-	cmdAddUser cli.Command = cli.Command{
+	cmdAddUser = cli.Command{
 		Name:    "create",
 		Usage:   "Add new user",
 		Aliases: []string{"a", "add"},
@@ -43,14 +44,14 @@ var (
 		Action: addUserAction,
 	}
 
-	cmdDelUser cli.Command = cli.Command{
+	cmdDelUser = cli.Command{
 		Name:    "delete",
 		Usage:   "Delete user",
 		Aliases: []string{"del", "d"},
 		Action:  delUserAction,
 	}
 
-	cmdResetPass cli.Command = cli.Command{
+	cmdResetPass = cli.Command{
 		Name:    "reset-pass",
 		Usage:   "Reset user's password",
 		Aliases: []string{"resetpass", "reset"},

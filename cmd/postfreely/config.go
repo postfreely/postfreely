@@ -11,12 +11,13 @@
 package main
 
 import (
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
+
+	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdConfig cli.Command = cli.Command{
+	cmdConfig = cli.Command{
 		Name:  "config",
 		Usage: "config management tools",
 		Subcommands: []*cli.Command{
@@ -25,14 +26,14 @@ var (
 		},
 	}
 
-	cmdConfigGenerate cli.Command = cli.Command{
+	cmdConfigGenerate = cli.Command{
 		Name:    "generate",
 		Aliases: []string{"gen"},
 		Usage:   "Generate a basic configuration",
 		Action:  genConfigAction,
 	}
 
-	cmdConfigInteractive cli.Command = cli.Command{
+	cmdConfigInteractive = cli.Command{
 		Name:   "start",
 		Usage:  "Interactive configuration process",
 		Action: interactiveConfigAction,

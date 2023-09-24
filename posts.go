@@ -618,7 +618,7 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		p.Font = "norm"
 	}
 
-	var newPost *PublicPost = &PublicPost{}
+	var newPost = &PublicPost{}
 	var coll *Collection
 	if accessToken != "" {
 		newPost, err = app.db.CreateOwnedPost(p, accessToken, collAlias, app.cfg.App.Host)
@@ -1185,7 +1185,7 @@ func (p *PublicPost) ActivityObject(app *App) *activitystreams.Object {
 	}
 	o.Name = p.DisplayTitle()
 	p.augmentContent()
-	if p.HTMLContent == template.HTML("") {
+	if p.HTMLContent == ("") {
 		p.formatContent(cfg, false, false)
 		p.augmentReadingDestination()
 	}

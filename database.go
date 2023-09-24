@@ -21,8 +21,6 @@ import (
 
 	"github.com/writeas/web-core/silobridge"
 
-	wf_db "github.com/postfreely/postfreely/db"
-
 	"github.com/guregu/null"
 	"github.com/guregu/null/zero"
 	uuid "github.com/nu7hatch/gouuid"
@@ -980,7 +978,7 @@ func (db *datastore) UpdateCollection(c *SubmittedCollection, alias string) erro
 
 const postCols = "id, slug, text_appearance, language, rtl, privacy, owner_id, collection_id, pinned_position, created, updated, view_count, title, content"
 
-// getEditablePost returns a PublicPost with the given ID only if the given
+// GetEditablePost returns a PublicPost with the given ID only if the given
 // edit token is valid for the post.
 func (db *datastore) GetEditablePost(id, editToken string) (*PublicPost, error) {
 	// FIXME: code duplicated from getPost()
@@ -1442,7 +1440,7 @@ func (db *datastore) ClaimPosts(cfg *config.Config, userID int64, collAlias stri
 		var qRes sql.Result
 		var query string
 		var params []interface{}
-		var slugIdx int = -1
+		var slugIdx = -1
 		var coll *Collection
 		if collAlias == "" {
 			// Posts are being claimed at /posts/claim, not
@@ -2651,7 +2649,7 @@ func (db *datastore) ValidateOAuthState(ctx context.Context, state string) (stri
 	var clientID string
 	var attachUserID sql.NullInt64
 	var inviteCode sql.NullString
-	err := wf_db.RunTransactionWithOptions(ctx, db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
+	err := dbase.RunTransactionWithOptions(ctx, db.DB, &sql.TxOptions{}, func(ctx context.Context, tx *sql.Tx) error {
 		err := tx.
 			QueryRowContext(ctx, "SELECT provider, client_id, attach_user_id, invite_code FROM oauth_client_states WHERE state = ? AND used = FALSE", state).
 			Scan(&provider, &clientID, &attachUserID, &inviteCode)

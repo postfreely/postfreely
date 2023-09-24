@@ -23,6 +23,8 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/writeas/web-core/l10n"
 	"github.com/writeas/web-core/log"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	"github.com/postfreely/postfreely/config"
 )
@@ -39,7 +41,7 @@ var (
 		"localstr":    localStr,
 		"localhtml":   localHTML,
 		"tolower":     strings.ToLower,
-		"title":       strings.Title,
+		"title":       title,
 		"hasPrefix":   strings.HasPrefix,
 		"hasSuffix":   strings.HasSuffix,
 		"dict":        dict,
@@ -139,9 +141,9 @@ func initUserPage(parentDir, path, key string) {
 // InitTemplates loads all template files from the configured parent dir.
 func InitTemplates(cfg *config.Config) error {
 
-	var templatesPath string = filepath.Join(cfg.Server.TemplatesParentDir, templatesDir)
+	var templatesPath = filepath.Join(cfg.Server.TemplatesParentDir, templatesDir)
 	if _, err := os.Stat(templatesPath); os.IsNotExist(err) {
-		var path string = templatesPath
+		var path = templatesPath
 
 		s, err := filepath.Abs(templatesPath)
 		if nil == err {
@@ -165,9 +167,9 @@ func InitTemplates(cfg *config.Config) error {
 		}
 	}
 
-	var pagesPath string = filepath.Join(cfg.Server.PagesParentDir, pagesDir)
+	var pagesPath = filepath.Join(cfg.Server.PagesParentDir, pagesDir)
 	if _, err := os.Stat(pagesPath); os.IsNotExist(err) {
-		var path string = pagesPath
+		var path = pagesPath
 
 		s, err := filepath.Abs(pagesPath)
 		if nil == err {
@@ -267,6 +269,13 @@ func localHTML(term, lang string) template.HTML {
 	}
 	s = strings.Replace(s, "write.as", "<a href=\"https://writefreely.org\">writefreely</a>", 1)
 	return template.HTML(s)
+}
+
+// title is a drop-in replacement for the deprecated strings.Title.
+// It uses the root language value, which should provide the same capitalization
+// rules as strings.Title did, but with awareness of Unicode punctuation and emoji.
+func title(d string) string {
+	return cases.Title(language.Und, cases.NoLower).String(d)
 }
 
 // from: https://stackoverflow.com/a/18276968/1549194

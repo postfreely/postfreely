@@ -66,12 +66,12 @@ func InitRoutes(apper Apper, r *mux.Router) *mux.Router {
 	// host-meta
 	write.HandleFunc("/.well-known/host-meta", handler.Web(handleViewHostMeta, UserLevelReader))
 	// webfinger
-	write.HandleFunc(webfinger.WebFingerPath, handler.LogHandlerFunc(http.HandlerFunc(wf.Webfinger)))
+	write.HandleFunc(webfinger.WebFingerPath, handler.LogHandlerFunc(wf.Webfinger))
 	// nodeinfo
 	niCfg := nodeInfoConfig(apper.App().db, apper.App().cfg)
 	ni := nodeinfo.NewService(*niCfg, nodeInfoResolver{apper.App().cfg, apper.App().db})
-	write.HandleFunc(nodeinfo.NodeInfoPath, handler.LogHandlerFunc(http.HandlerFunc(ni.NodeInfoDiscover)))
-	write.HandleFunc(niCfg.InfoURL, handler.LogHandlerFunc(http.HandlerFunc(ni.NodeInfo)))
+	write.HandleFunc(nodeinfo.NodeInfoPath, handler.LogHandlerFunc(ni.NodeInfoDiscover))
+	write.HandleFunc(niCfg.InfoURL, handler.LogHandlerFunc(ni.NodeInfo))
 
 	// handle mentions
 	write.HandleFunc("/@/{handle}", handler.Web(handleViewMention, UserLevelReader))
