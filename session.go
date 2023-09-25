@@ -12,10 +12,11 @@ package postfreely
 
 import (
 	"encoding/gob"
-	"github.com/gorilla/sessions"
-	"github.com/writeas/web-core/log"
 	"net/http"
 	"strings"
+
+	"github.com/gorilla/sessions"
+	"github.com/writeas/web-core/log"
 )
 
 const (
@@ -112,7 +113,7 @@ func saveUserSession(app *App, r *http.Request, w http.ResponseWriter) error {
 	}
 
 	// Extend the session
-	session.Options.MaxAge = int(sessionLength)
+	session.Options.MaxAge = sessionLength
 
 	// Remove any information that accidentally got added
 	// FIXME: find where Plan information is getting saved to cookie.

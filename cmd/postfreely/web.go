@@ -12,13 +12,14 @@ package main
 
 import (
 	"github.com/gorilla/mux"
-	"github.com/postfreely/postfreely"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
+
+	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdServe cli.Command = cli.Command{
+	cmdServe = cli.Command{
 		Name:    "serve",
 		Aliases: []string{"web"},
 		Usage:   "Run web application",

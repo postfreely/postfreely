@@ -62,8 +62,8 @@ const (
 
 var _ SQLBuilder = &CreateTableSqlBuilder{}
 
-var UnsetSize OptionalInt = OptionalInt{Set: false, Value: 0}
-var UnsetDefault OptionalString = OptionalString{Set: false, Value: ""}
+var UnsetSize = OptionalInt{Set: false, Value: 0}
+var UnsetDefault = OptionalString{Set: false, Value: ""}
 
 func (d ColumnType) Format(dialect DialectType, size OptionalInt) (string, error) {
 	if dialect != DialectMySQL && dialect != DialectSQLite {

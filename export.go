@@ -75,7 +75,7 @@ func exportPostsZip(u *User, posts *[]PublicPost) []byte {
 
 	for _, file := range files {
 		head := &zip.FileHeader{Name: file.Name}
-		head.SetModTime(file.Mod)
+		head.Modified = file.Mod
 		f, err := w.CreateHeader(head)
 		if err != nil {
 			log.Error("export zip header: %v", err)
