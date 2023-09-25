@@ -8,15 +8,16 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
-	"github.com/writeas/web-core/log"
 	"io"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/writeas/web-core/log"
 )
 
 // updatesCacheTime is the default interval between cache updates for new
@@ -58,7 +59,7 @@ func (uc *updatesCache) CheckNow() error {
 
 // AreAvailable updates the cache if the frequency duration has passed
 // then returns if the latest release is newer than the current running version.
-func (uc updatesCache) AreAvailable() bool {
+func (uc *updatesCache) AreAvailable() bool {
 	if time.Since(uc.lastCheck) > uc.frequency {
 		uc.CheckNow()
 	}
@@ -67,22 +68,22 @@ func (uc updatesCache) AreAvailable() bool {
 
 // AreAvailableNoCheck returns if the latest release is newer than the current
 // running version.
-func (uc updatesCache) AreAvailableNoCheck() bool {
+func (uc *updatesCache) AreAvailableNoCheck() bool {
 	return CompareSemver(uc.latestVersion, uc.currentVersion) == 1
 }
 
 // LatestVersion returns the latest stored version available.
-func (uc updatesCache) LatestVersion() string {
+func (uc *updatesCache) LatestVersion() string {
 	return uc.latestVersion
 }
 
-func (uc updatesCache) ReleaseURL() string {
+func (uc *updatesCache) ReleaseURL() string {
 	return "https://writefreely.org/releases/" + uc.latestVersion
 }
 
 // ReleaseNotesURL returns the full URL to the blog.writefreely.org release notes
 // for the latest version as stored in the cache.
-func (uc updatesCache) ReleaseNotesURL() string {
+func (uc *updatesCache) ReleaseNotesURL() string {
 	return wfReleaseNotesURL(uc.latestVersion)
 }
 

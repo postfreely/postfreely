@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"encoding/json"
@@ -16,10 +16,10 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/postfreely/postfreely/config"
 	"github.com/writeas/go-webfinger"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely/config"
 )
 
 type wfResolver struct {

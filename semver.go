@@ -21,11 +21,11 @@
 // vMAJOR and vMAJOR.MINOR (with no prerelease or build suffixes)
 // as shorthands for vMAJOR.0.0 and vMAJOR.MINOR.0.
 
-// Package writefreely
+// Package postfreely
 // copied from
 // https://github.com/golang/tools/blob/master/internal/semver/semver.go
 // slight modifications made
-package writefreely
+package postfreely
 
 // parsed returns the parsed form of a semantic version string.
 type parsed struct {

@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"encoding/json"
@@ -636,28 +636,28 @@ func viewExportPosts(app *App, w http.ResponseWriter, r *http.Request) ([]byte, 
 
 	// Fetch data we're exporting
 	var err error
-	var data []byte
+	var exdata []byte
 	posts, err := app.db.GetUserPosts(u)
 	if err != nil {
-		return data, filename, err
+		return exdata, filename, err
 	}
 
 	// Export as CSV
 	if strings.HasSuffix(r.URL.Path, ".csv") {
-		data = exportPostsCSV(app.cfg.App.Host, u, posts)
-		return data, filename, err
+		exdata = exportPostsCSV(app.cfg.App.Host, u, posts)
+		return exdata, filename, err
 	}
 	if strings.HasSuffix(r.URL.Path, ".zip") {
-		data = exportPostsZip(u, posts)
-		return data, filename, err
+		exdata = exportPostsZip(u, posts)
+		return exdata, filename, err
 	}
 
 	if r.FormValue("pretty") == "1" {
-		data, err = json.MarshalIndent(posts, "", "\t")
+		exdata, err = json.MarshalIndent(posts, "", "\t")
 	} else {
-		data, err = json.Marshal(posts)
+		exdata, err = json.Marshal(posts)
 	}
-	return data, filename, err
+	return exdata, filename, err
 }
 
 func viewExportFull(app *App, w http.ResponseWriter, r *http.Request) ([]byte, string, error) {
@@ -671,13 +671,13 @@ func viewExportFull(app *App, w http.ResponseWriter, r *http.Request) ([]byte, s
 
 	exportUser := compileFullExport(app, u)
 
-	var data []byte
+	var exdata []byte
 	if r.FormValue("pretty") == "1" {
-		data, err = json.MarshalIndent(exportUser, "", "\t")
+		exdata, err = json.MarshalIndent(exportUser, "", "\t")
 	} else {
-		data, err = json.Marshal(exportUser)
+		exdata, err = json.Marshal(exportUser)
 	}
-	return data, filename, err
+	return exdata, filename, err
 }
 
 func viewMeAPI(app *App, w http.ResponseWriter, r *http.Request) error {
@@ -861,9 +861,6 @@ func viewEditCollection(app *App, u *User, w http.ResponseWriter, r *http.Reques
 	if c.OwnerID != u.ID {
 		return ErrCollectionNotFound
 	}
-
-	// Add collection properties
-	c.Monetization = app.db.GetCollectionAttribute(c.ID, "monetization_pointer")
 
 	silenced, err := app.db.IsUserSilenced(u.ID)
 	if err != nil {

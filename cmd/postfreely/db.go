@@ -12,11 +12,12 @@ package main
 
 import (
 	"github.com/urfave/cli/v2"
+
 	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdDB cli.Command = cli.Command{
+	cmdDB = cli.Command{
 		Name:  "db",
 		Usage: "db management tools",
 		Subcommands: []*cli.Command{
@@ -25,13 +26,13 @@ var (
 		},
 	}
 
-	cmdDBInit cli.Command = cli.Command{
+	cmdDBInit = cli.Command{
 		Name:   "init",
 		Usage:  "Initialize Database",
 		Action: initDBAction,
 	}
 
-	cmdDBMigrate cli.Command = cli.Command{
+	cmdDBMigrate = cli.Command{
 		Name:   "migrate",
 		Usage:  "Migrate Database",
 		Action: migrateDBAction,
@@ -39,11 +40,11 @@ var (
 )
 
 func initDBAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.CreateSchema(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.CreateSchema(app)
 }
 
 func migrateDBAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.Migrate(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.Migrate(app)
 }

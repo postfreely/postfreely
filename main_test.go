@@ -1,4 +1,4 @@
-package writefreely
+package postfreely
 
 import (
 	"context"
@@ -6,13 +6,12 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	uuid "github.com/nu7hatch/gouuid"
-	"github.com/stretchr/testify/assert"
-	"math/rand"
 	"os"
 	"strings"
 	"testing"
-	"time"
+
+	uuid "github.com/nu7hatch/gouuid"
+	"github.com/stretchr/testify/assert"
 )
 
 var testDB *sql.DB
@@ -21,7 +20,6 @@ type ScopedTestBody func(*sql.DB)
 
 // TestMain provides testing infrastructure within this package.
 func TestMain(m *testing.M) {
-	rand.Seed(time.Now().UTC().UnixNano())
 	gob.Register(&User{})
 
 	if runMySQLTests() {

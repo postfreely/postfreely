@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql"
@@ -141,6 +141,7 @@ type (
 		IsPinned       bool
 		IsCustomDomain bool
 		Monetization   string
+		Verification   string
 		PinnedPosts    *[]PublicPost
 		IsFound        bool
 		IsAdmin        bool
@@ -470,7 +471,7 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		}
 	} else {
 		var err error
-		page := struct {
+		postPage := struct {
 			*AnonymousPost
 			page.StaticPage
 			Username string
@@ -483,15 +484,15 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 			SiteURL:       app.cfg.App.Host,
 		}
 		if u = getUserSession(app, r); u != nil {
-			page.Username = u.Username
-			page.IsOwner = ownerID.Valid && ownerID.Int64 == u.ID
+			postPage.Username = u.Username
+			postPage.IsOwner = ownerID.Valid && ownerID.Int64 == u.ID
 		}
 
-		if !page.IsOwner && silenced {
+		if !postPage.IsOwner && silenced {
 			return ErrPostNotFound
 		}
-		page.Silenced = silenced
-		err = templates["post"].ExecuteTemplate(w, "post", page)
+		postPage.Silenced = silenced
+		err = templates["post"].ExecuteTemplate(w, "post", postPage)
 		if err != nil {
 			log.Error("Post template execute error: %v", err)
 		}
@@ -518,11 +519,9 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 // newPost creates a new post with or without an owning Collection.
 //
 // Endpoints:
-//
-//	/posts
-//	/posts?collection={alias}
-//
-// ? /collections/{alias}/posts
+//   - /posts
+//   - /posts?collection={alias}
+//   - ? /collections/{alias}/posts
 func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 	reqJSON := IsJSON(r)
 	vars := mux.Vars(r)
@@ -618,7 +617,7 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		p.Font = "norm"
 	}
 
-	var newPost *PublicPost = &PublicPost{}
+	var newPost = &PublicPost{}
 	var coll *Collection
 	if accessToken != "" {
 		newPost, err = app.db.CreateOwnedPost(p, accessToken, collAlias, app.cfg.App.Host)
@@ -1123,8 +1122,7 @@ func fetchPost(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	p.extractData()
 
-	accept := r.Header.Get("Accept")
-	if strings.Contains(accept, "application/activity+json") {
+	if IsActivityPubRequest(r) {
 		if coll == nil {
 			// This is a draft post; 404 for now
 			// TODO: return ActivityObject
@@ -1185,7 +1183,7 @@ func (p *PublicPost) ActivityObject(app *App) *activitystreams.Object {
 	}
 	o.Name = p.DisplayTitle()
 	p.augmentContent()
-	if p.HTMLContent == template.HTML("") {
+	if p.HTMLContent == ("") {
 		p.formatContent(cfg, false, false)
 		p.augmentReadingDestination()
 	}
@@ -1373,14 +1371,14 @@ func isRaw(r *http.Request) bool {
 
 func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error {
 	vars := mux.Vars(r)
-	slug := vars["slug"]
+	postSlug := vars["slug"]
 
 	// NOTE: until this is done better, be sure to keep this in parity with
 	// isRaw() and handleViewPost()
-	isJSON := strings.HasSuffix(slug, ".json")
-	isXML := strings.HasSuffix(slug, ".xml")
-	isMarkdown := strings.HasSuffix(slug, ".md")
-	isRaw := strings.HasSuffix(slug, ".txt") || isJSON || isXML || isMarkdown
+	isJSON := strings.HasSuffix(postSlug, ".json")
+	isXML := strings.HasSuffix(postSlug, ".xml")
+	isMarkdown := strings.HasSuffix(postSlug, ".md")
+	isRaw := strings.HasSuffix(postSlug, ".txt") || isJSON || isXML || isMarkdown
 
 	cr := &collectionReq{}
 	err := processCollectionRequest(cr, vars, w, r)
@@ -1395,8 +1393,8 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 	}
 
 	// Normalize the URL, redirecting user to consistent post URL
-	if slug != strings.ToLower(slug) {
-		loc := fmt.Sprintf("/%s", strings.ToLower(slug))
+	if postSlug != strings.ToLower(postSlug) {
+		loc := fmt.Sprintf("/%s", strings.ToLower(postSlug))
 		if !app.cfg.App.SingleUser {
 			loc = "/" + cr.alias + loc
 		}
@@ -1416,7 +1414,7 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 				// Redirect if necessary
 				newAlias := app.db.GetCollectionRedirect(cr.alias)
 				if newAlias != "" {
-					return impart.HTTPError{http.StatusFound, "/" + newAlias + "/" + slug}
+					return impart.HTTPError{http.StatusFound, "/" + newAlias + "/" + postSlug}
 				}
 			}
 		}
@@ -1437,14 +1435,14 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 		if silenced {
 			return ErrPostNotFound
 		} else if !isAuthorizedForCollection(app, c.Alias, r) {
-			return impart.HTTPError{http.StatusFound, c.CanonicalURL() + "/?g=" + slug}
+			return impart.HTTPError{http.StatusFound, c.CanonicalURL() + "/?g=" + postSlug}
 		}
 	}
 
 	cr.isCollOwner = u != nil && c.OwnerID == u.ID
 
 	if isRaw {
-		slug = strings.Split(slug, ".")[0]
+		postSlug = strings.Split(postSlug, ".")[0]
 	}
 
 	// Fetch extra data about the Collection
@@ -1459,19 +1457,19 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 	}
 
 	postFound := true
-	p, err := app.db.GetPost(slug, coll.ID)
+	p, err := app.db.GetPost(postSlug, coll.ID)
 	if err != nil {
 		if err == ErrCollectionPageNotFound {
 			postFound = false
 
-			if slug == "feed" {
+			if postSlug == "feed" {
 				// User tried to access blog feed without a trailing slash, and
 				// there's no post with a slug "feed"
 				return impart.HTTPError{http.StatusFound, c.CanonicalURL() + "feed/"}
 			}
 
 			po := &Post{
-				Slug:     null.NewString(slug, true),
+				Slug:     null.NewString(postSlug, true),
 				Font:     "norm",
 				Language: zero.NewString("en", true),
 				RTL:      zero.NewBool(false, true),
@@ -1551,7 +1549,8 @@ Are you sure it was ever here?`,
 		tp.CanInvite = canUserInvite(app.cfg, tp.IsAdmin)
 		tp.PinnedPosts, _ = app.db.GetPinnedPosts(coll, p.IsOwner)
 		tp.IsPinned = len(*tp.PinnedPosts) > 0 && PostsContains(tp.PinnedPosts, p)
-		tp.Monetization = app.db.GetCollectionAttribute(coll.ID, "monetization_pointer")
+		tp.Monetization = coll.Monetization
+		tp.Verification = coll.Verification
 
 		if !postFound {
 			w.WriteHeader(http.StatusNotFound)
@@ -1574,7 +1573,7 @@ Are you sure it was ever here?`,
 		}
 		// Update stats for non-raw post views
 		if !isRaw && r.Method != "HEAD" && !bots.IsBot(r.UserAgent()) {
-			_, err := app.db.Exec("UPDATE posts SET view_count = view_count + 1 WHERE slug = ? AND collection_id = ?", slug, coll.ID)
+			_, err := app.db.Exec("UPDATE posts SET view_count = view_count + 1 WHERE slug = ? AND collection_id = ?", postSlug, coll.ID)
 			if err != nil {
 				log.Error("Unable to update posts count: %v", err)
 			}

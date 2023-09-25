@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql"
@@ -40,6 +40,28 @@ func defaultAboutTitle(cfg *config.Config) sql.NullString {
 	return sql.NullString{String: "About " + cfg.App.SiteName, Valid: true}
 }
 
+func getContactPage(app *App) (*instanceContent, error) {
+	c, err := app.db.GetDynamicContent("contact")
+	if err != nil {
+		return nil, err
+	}
+	if c == nil {
+		c = &instanceContent{
+			ID:      "contact",
+			Type:    "page",
+			Content: defaultContactPage(app),
+		}
+	}
+	if !c.Title.Valid {
+		c.Title = defaultContactTitle()
+	}
+	return c, nil
+}
+
+func defaultContactTitle() sql.NullString {
+	return sql.NullString{String: "Contact Us", Valid: true}
+}
+
 func getPrivacyPage(app *App) (*instanceContent, error) {
 	c, err := app.db.GetDynamicContent("privacy")
 	if err != nil {
@@ -65,13 +87,25 @@ func defaultPrivacyTitle() sql.NullString {
 
 func defaultAboutPage(cfg *config.Config) string {
 	if cfg.App.Federation {
-		return `_` + cfg.App.SiteName + `_ is an interconnected place for you to write and publish, powered by [`+serverSoftware+`](`+softwareURL+`) and ActivityPub.`
+		return `_` + cfg.App.SiteName + `_ is an interconnected place for you to write and publish, powered by [` + serverSoftware + `](` + softwareURL + `) and ActivityPub.`
 	}
-	return `_` + cfg.App.SiteName + `_ is a place for you to write and publish, powered by [`+serverSoftware+`](`+softwareURL+`).`
+	return `_` + cfg.App.SiteName + `_ is a place for you to write and publish, powered by [` + serverSoftware + `](` + softwareURL + `).`
+}
+
+func defaultContactPage(app *App) string {
+	c, err := app.db.GetCollectionByID(1)
+	if err != nil {
+		return ""
+	}
+	return `_` + app.cfg.App.SiteName + `_ is administered by: [**` + c.Alias + `**](/` + c.Alias + `/).
+
+Contact them at this email address: _EMAIL GOES HERE_.
+
+You can also reach them here...`
 }
 
 func defaultPrivacyPolicy(cfg *config.Config) string {
-	return `[`+serverSoftware+`](`+softwareURL+`), the software that powers this site, is built to enforce your right to privacy by default.
+	return `[` + serverSoftware + `](` + softwareURL + `), the software that powers this site, is built to enforce your right to privacy by default.
 
 It retains as little data about you as possible, not even requiring an email address to sign up. However, if you _do_ give us your email address, it is stored encrypted in our database. We salt and hash your account's password.
 
@@ -123,7 +157,7 @@ func defaultLandingBody(cfg *config.Config) string {
 	if cfg.App.Federation {
 		return `## Join the Fediverse
 
-The fediverse is a large network of platforms that all speak a common language. Imagine if you could reply to Instagram posts from Twitter, or interact with your favorite Medium blogs from Facebook -- federated alternatives like [PixelFed](https://pixelfed.org), [Mastodon](https://joinmastodon.org), and `+serverSoftware+` enable you to do these types of things.
+The fediverse is a large network of platforms that all speak a common language. Imagine if you could reply to Instagram posts from Twitter, or interact with your favorite Medium blogs from Facebook -- federated alternatives like [PixelFed](https://pixelfed.org), [Mastodon](https://joinmastodon.org), and ` + serverSoftware + ` enable you to do these types of things.
 
 <div style="text-align:center">
 	<iframe style="width: 560px; height: 315px; max-width: 100%;" sandbox="allow-same-origin allow-scripts" src="https://video.writeas.org/videos/embed/cc55e615-d204-417c-9575-7b57674cc6f3" frameborder="0" allowfullscreen></iframe>
@@ -131,7 +165,7 @@ The fediverse is a large network of platforms that all speak a common language. 
 
 ## Write More Socially
 
-`+serverSoftware+` can communicate with other federated platforms like Mastodon, so people can follow your blogs, bookmark their favorite posts, and boost them to their followers. Sign up above to create a blog and join the fediverse.`
+` + serverSoftware + ` can communicate with other federated platforms like Mastodon, so people can follow your blogs, bookmark their favorite posts, and boost them to their followers. Sign up above to create a blog and join the fediverse.`
 	}
 	return ""
 }

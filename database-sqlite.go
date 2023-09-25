@@ -11,7 +11,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql/driver"

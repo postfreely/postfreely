@@ -14,11 +14,12 @@ import (
 	"fmt"
 
 	"github.com/urfave/cli/v2"
+
 	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdUser cli.Command = cli.Command{
+	cmdUser = cli.Command{
 		Name:  "user",
 		Usage: "user management tools",
 		Subcommands: []*cli.Command{
@@ -29,7 +30,7 @@ var (
 		},
 	}
 
-	cmdAddUser cli.Command = cli.Command{
+	cmdAddUser = cli.Command{
 		Name:    "create",
 		Usage:   "Add new user",
 		Aliases: []string{"a", "add"},
@@ -43,14 +44,14 @@ var (
 		Action: addUserAction,
 	}
 
-	cmdDelUser cli.Command = cli.Command{
+	cmdDelUser = cli.Command{
 		Name:    "delete",
 		Usage:   "Delete user",
 		Aliases: []string{"del", "d"},
 		Action:  delUserAction,
 	}
 
-	cmdResetPass cli.Command = cli.Command{
+	cmdResetPass = cli.Command{
 		Name:    "reset-pass",
 		Usage:   "Reset user's password",
 		Aliases: []string{"resetpass", "reset"},
@@ -67,8 +68,8 @@ func addUserAction(c *cli.Context) error {
 	if err != nil {
 		return err
 	}
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.CreateUser(app, username, password, c.Bool("admin"))
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.CreateUser(app, username, password, c.Bool("admin"))
 }
 
 func delUserAction(c *cli.Context) error {
@@ -76,8 +77,8 @@ func delUserAction(c *cli.Context) error {
 		return fmt.Errorf("No user passed. Example: writefreely user delete [USER]")
 	}
 	username := c.Args().Get(0)
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.DoDeleteAccount(app, username)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.DoDeleteAccount(app, username)
 }
 
 func resetPassAction(c *cli.Context) error {
@@ -85,6 +86,6 @@ func resetPassAction(c *cli.Context) error {
 		return fmt.Errorf("No user passed. Example: writefreely user reset-pass [USER]")
 	}
 	username := c.Args().Get(0)
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.ResetPassword(app, username)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.ResetPassword(app, username)
 }

@@ -14,7 +14,7 @@
 // This file contains dummy database funcs for when writefreely is used as a
 // library.
 
-package writefreely
+package postfreely
 
 func (db *datastore) isDuplicateKeyErr(err error) bool {
 	return false

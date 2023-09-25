@@ -8,15 +8,22 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"mime"
 	"net/http"
+	"strings"
 )
 
 func IsJSON(r *http.Request) bool {
 	ct, _, _ := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	accept := r.Header.Get("Accept")
 	return ct == "application/json" || accept == "application/json"
+}
+
+func IsActivityPubRequest(r *http.Request) bool {
+	accept := r.Header.Get("Accept")
+	return strings.Contains(accept, "application/activity+json") ||
+		accept == "application/ld+json; profile=\"https://www.w3.org/ns/activitystreams\""
 }

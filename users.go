@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"time"
@@ -16,6 +16,7 @@ import (
 	"github.com/guregu/null/zero"
 	"github.com/writeas/web-core/data"
 	"github.com/writeas/web-core/log"
+
 	"github.com/postfreely/postfreely/key"
 )
 
@@ -72,7 +73,7 @@ type (
 		Created    time.Time   `json:"created"`
 		Status     UserStatus  `json:"status"`
 
-		clearEmail string `json:"email"`
+		clearEmail string
 	}
 
 	userMeStats struct {

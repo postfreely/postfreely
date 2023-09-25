@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"database/sql"
@@ -18,10 +18,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/id"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely/page"
 )
 
 type Invite struct {

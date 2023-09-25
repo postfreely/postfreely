@@ -12,11 +12,12 @@ package main
 
 import (
 	"github.com/urfave/cli/v2"
+
 	"github.com/postfreely/postfreely"
 )
 
 var (
-	cmdKeys cli.Command = cli.Command{
+	cmdKeys = cli.Command{
 		Name:  "keys",
 		Usage: "key management tools",
 		Subcommands: []*cli.Command{
@@ -24,7 +25,7 @@ var (
 		},
 	}
 
-	cmdGenerateKeys cli.Command = cli.Command{
+	cmdGenerateKeys = cli.Command{
 		Name:    "generate",
 		Aliases: []string{"gen"},
 		Usage:   "Generate encryption and authentication keys",
@@ -33,6 +34,6 @@ var (
 )
 
 func genKeysAction(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
-	return writefreely.GenerateKeyFiles(app)
+	app := postfreely.NewApp(c.String("c"))
+	return postfreely.GenerateKeyFiles(app)
 }

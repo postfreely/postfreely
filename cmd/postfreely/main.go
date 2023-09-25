@@ -19,6 +19,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
 	"github.com/writeas/web-core/log"
+
 	"github.com/postfreely/postfreely"
 )
 
@@ -33,7 +34,7 @@ func main() {
 	app := &cli.App{
 		Name:    "WriteFreely",
 		Usage:   "A beautifully pared-down blogging platform",
-		Version: writefreely.FormatVersion(),
+		Version: postfreely.FormatVersion(),
 		Action:  legacyActions, // legacy due to use of flags for switching actions
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
@@ -116,6 +117,7 @@ func main() {
 		&cmdUser,
 		&cmdDB,
 		&cmdConfig,
+		&cmdTemplates,
 		&cmdKeys,
 		&cmdServe,
 	}
@@ -125,7 +127,7 @@ func main() {
 		log.Error(err.Error())
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Error("Have you generated the keys yet? If not, run —")
-			var cmdname string = assumedExecutableName
+			var cmdname = assumedExecutableName
 			if s, err := os.Executable(); nil == err {
 				cmdname = s
 			}
@@ -136,53 +138,53 @@ func main() {
 }
 
 func legacyActions(c *cli.Context) error {
-	app := writefreely.NewApp(c.String("c"))
+	app := postfreely.NewApp(c.String("c"))
 
 	switch true {
 	case c.IsSet("create-config"):
-		return writefreely.CreateConfig(app)
+		return postfreely.CreateConfig(app)
 	case c.IsSet("config"):
-		writefreely.DoConfig(app, c.String("sections"))
+		postfreely.DoConfig(app, c.String("sections"))
 		return nil
 	case c.IsSet("gen-keys"):
-		return writefreely.GenerateKeyFiles(app)
+		return postfreely.GenerateKeyFiles(app)
 	case c.IsSet("init-db"):
-		return writefreely.CreateSchema(app)
+		return postfreely.CreateSchema(app)
 	case c.IsSet("migrate"):
-		return writefreely.Migrate(app)
+		return postfreely.Migrate(app)
 	case c.IsSet("create-admin"):
 		username, password, err := parseCredentials(c.String("create-admin"))
 		if err != nil {
 			return err
 		}
-		return writefreely.CreateUser(app, username, password, true)
+		return postfreely.CreateUser(app, username, password, true)
 	case c.IsSet("create-user"):
 		username, password, err := parseCredentials(c.String("create-user"))
 		if err != nil {
 			return err
 		}
-		return writefreely.CreateUser(app, username, password, false)
+		return postfreely.CreateUser(app, username, password, false)
 	case c.IsSet("delete-user"):
-		return writefreely.DoDeleteAccount(app, c.String("delete-user"))
+		return postfreely.DoDeleteAccount(app, c.String("delete-user"))
 	case c.IsSet("reset-pass"):
-		return writefreely.ResetPassword(app, c.String("reset-pass"))
+		return postfreely.ResetPassword(app, c.String("reset-pass"))
 	}
 
 	// Initialize the application
 	var err error
-	log.Info("Starting %s...", writefreely.FormatVersion())
-	app, err = writefreely.Initialize(app, c.Bool("debug"))
+	log.Info("Starting %s...", postfreely.FormatVersion())
+	app, err = postfreely.Initialize(app, c.Bool("debug"))
 	if err != nil {
 		return err
 	}
 
 	// Set app routes
 	r := mux.NewRouter()
-	writefreely.InitRoutes(app, r)
+	postfreely.InitRoutes(app, r)
 	app.InitStaticRoutes(r)
 
 	// Serve the application
-	writefreely.Serve(app, r)
+	postfreely.Serve(app, r)
 
 	return nil
 }

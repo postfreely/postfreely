@@ -8,16 +8,16 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/auth"
 	"github.com/writeas/web-core/log"
-	"github.com/postfreely/postfreely/page"
 	"html/template"
 	"net/http"
 	"strings"

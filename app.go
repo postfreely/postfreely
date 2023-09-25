@@ -8,7 +8,7 @@
  * in the LICENSE file in this source code package.
  */
 
-package writefreely
+package postfreely
 
 import (
 	"crypto/tls"
@@ -154,7 +154,7 @@ func (app *App) LoadConfig() error {
 		log.Error("Unable to load configuration: %v", err)
 		if errors.Is(err, fs.ErrNotExist) {
 			log.Error("Have you created the config file yet? If not, run —")
-			var cmdname string = assumedExecutableName
+			var cmdname = assumedExecutableName
 			if s, err := os.Executable(); nil == err {
 				cmdname = s
 			}
@@ -331,7 +331,7 @@ func handleTemplatedPage(app *App, w http.ResponseWriter, r *http.Request, t *te
 	}{
 		StaticPage: pageForReq(app, r),
 	}
-	if r.URL.Path == "/about" || r.URL.Path == "/privacy" {
+	if r.URL.Path == "/about" || r.URL.Path == "/contact" || r.URL.Path == "/privacy" {
 		var c *instanceContent
 		var err error
 
@@ -342,6 +342,12 @@ func handleTemplatedPage(app *App, w http.ResponseWriter, r *http.Request, t *te
 			p.AboutStats = &InstanceStats{}
 			p.AboutStats.NumPosts, _ = app.db.GetTotalPosts()
 			p.AboutStats.NumBlogs, _ = app.db.GetTotalCollections()
+		} else if r.URL.Path == "/contact" {
+			c, err = getContactPage(app)
+			if c.Updated.IsZero() {
+				// Page was never set up, so return 404
+				return ErrPostNotFound
+			}
 		} else {
 			c, err = getPrivacyPage(app)
 		}
@@ -414,6 +420,12 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	// Load templates
 	err := InitTemplates(apper.App().Config())
 	if err != nil {
+		log.Error("Have you unpacked the template files? If not, run —")
+		cmdname := assumedExecutableName
+		if s, err := os.Executable(); nil == err {
+			cmdname = s
+		}
+		log.Error("\t%s templates generate", cmdname)
 		return nil, fmt.Errorf("load templates: %w", err)
 	}
 
@@ -582,8 +594,8 @@ func (app *App) InitDecoder() {
 // tests the connection.
 func ConnectToDatabase(app *App) error {
 	// Check database configuration
-	if app.cfg.Database.Type == dbase.TypeMySQL && (app.cfg.Database.User == "" || app.cfg.Database.Password == "") {
-		return errors.New("Database user or password not set.")
+	if app.cfg.Database.Type == dbase.TypeMySQL && app.cfg.Database.User == "" {
+		return errors.New("Database user not set.")
 	}
 	if app.cfg.Database.Host == "" {
 		app.cfg.Database.Host = "localhost"
@@ -948,16 +960,17 @@ var schemaSql string
 var sqliteSql string
 
 func adminInitDatabase(app *App) error {
-	var schema string
+	var dbschema string
 	if app.cfg.Database.Type == dbase.TypeSQLite {
-		schema = sqliteSql
+		dbschema = sqliteSql
 	} else {
-		schema = schemaSql
+		dbschema = schemaSql
 	}
 
 	tblReg := regexp.MustCompile("CREATE TABLE (IF NOT EXISTS )?`([a-z_]+)`")
 
-	queries := strings.Split(string(schema), ";\n")
+	queries := strings.Split(dbschema, ";\n")
+
 	for _, q := range queries {
 		if strings.TrimSpace(q) == "" {
 			continue
