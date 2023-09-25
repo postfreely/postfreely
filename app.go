@@ -72,7 +72,6 @@ var (
 
 // App holds data and configuration for an individual WriteFreely instance.
 type App struct {
-	router       *mux.Router
 	shttp        *http.ServeMux
 	db           *datastore
 	cfg          *config.Config
@@ -88,11 +87,6 @@ type App struct {
 // DB returns the App's datastore
 func (app *App) DB() *datastore {
 	return app.db
-}
-
-// Router returns the App's router
-func (app *App) Router() *mux.Router {
-	return app.router
 }
 
 // Config returns the App's current configuration.
