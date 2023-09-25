@@ -40,7 +40,7 @@ func (app *App) InitSession() {
 		Path:     "/",
 		MaxAge:   sessionLength,
 		HttpOnly: true,
-		Secure:   strings.HasPrefix(app.cfg.App.Host, "https://"),
+		Secure:   strings.HasPrefix(app.Config().App.Host, "https://"),
 	}
 	if store.Options.Secure {
 		store.Options.SameSite = http.SameSiteNoneMode

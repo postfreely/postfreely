@@ -39,10 +39,10 @@ func InitKeys(apper Apper) error {
 }
 
 func initKeyPaths(app *App) {
-	emailKeyPath = filepath.Join(app.cfg.Server.KeysParentDir, emailKeyPath)
-	cookieAuthKeyPath = filepath.Join(app.cfg.Server.KeysParentDir, cookieAuthKeyPath)
-	cookieKeyPath = filepath.Join(app.cfg.Server.KeysParentDir, cookieKeyPath)
-	csrfKeyPath = filepath.Join(app.cfg.Server.KeysParentDir, csrfKeyPath)
+	emailKeyPath = filepath.Join(app.Config().Server.KeysParentDir, emailKeyPath)
+	cookieAuthKeyPath = filepath.Join(app.Config().Server.KeysParentDir, cookieAuthKeyPath)
+	cookieKeyPath = filepath.Join(app.Config().Server.KeysParentDir, cookieKeyPath)
+	csrfKeyPath = filepath.Join(app.Config().Server.KeysParentDir, csrfKeyPath)
 }
 
 // generateKey generates a key at the given path used for the encryption of

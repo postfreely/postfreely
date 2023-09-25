@@ -65,7 +65,7 @@ func NewUserPage(app *App, r *http.Request, u *User, title string, flashes []str
 	up.Flashes = flashes
 	up.Path = r.URL.Path
 	up.IsAdmin = u.IsAdmin()
-	up.CanInvite = canUserInvite(app.cfg, up.IsAdmin)
+	up.CanInvite = canUserInvite(app.Config(), up.IsAdmin)
 	return up
 }
 
@@ -90,7 +90,7 @@ func apiSignup(app *App, w http.ResponseWriter, r *http.Request) error {
 }
 
 func signup(app *App, w http.ResponseWriter, r *http.Request) (*AuthUser, error) {
-	if app.cfg.App.DisablePasswordAuth {
+	if app.Config().App.DisablePasswordAuth {
 		err := ErrDisabledPasswordAuth
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func signupWithRegistration(app *App, signup userRegistration, w http.ResponseWr
 		desiredUsername = signup.Alias
 		signup.Alias = getSlug(signup.Alias, "")
 	}
-	if !author.IsValidUsername(app.cfg, signup.Alias) {
+	if !author.IsValidUsername(app.Config(), signup.Alias) {
 		// Ensure the username is syntactically correct.
 		return nil, impart.HTTPError{http.StatusPreconditionFailed, "Username is reserved or isn't valid. It must be at least 3 characters long, and can only include letters, numbers, and hyphens."}
 	}
@@ -169,7 +169,7 @@ func signupWithRegistration(app *App, signup userRegistration, w http.ResponseWr
 	}
 
 	// Create actual user
-	if err := app.db.CreateUser(app.cfg, u, desiredUsername, signup.Description); err != nil {
+	if err := app.db.CreateUser(app.Config(), u, desiredUsername, signup.Description); err != nil {
 		return nil, err
 	}
 
@@ -394,7 +394,7 @@ func login(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	redirectTo := r.FormValue("to")
 	if redirectTo == "" {
-		if app.cfg.App.SingleUser {
+		if app.Config().App.SingleUser {
 			redirectTo = "/me/new"
 		} else {
 			redirectTo = "/"
@@ -405,7 +405,7 @@ func login(app *App, w http.ResponseWriter, r *http.Request) error {
 	var err error
 	var signin userCredentials
 
-	if app.cfg.App.DisablePasswordAuth {
+	if app.Config().App.DisablePasswordAuth {
 		err := ErrDisabledPasswordAuth
 		return err
 	}
@@ -471,7 +471,7 @@ func login(app *App, w http.ResponseWriter, r *http.Request) error {
 
 		// Prevent excessive login attempts on the same account
 		// Skip this check in dev environment
-		if !app.cfg.Server.Dev {
+		if !app.Config().Server.Dev {
 			now := time.Now()
 			attemptExp, att := loginAttemptUsers.LoadOrStore(signin.Alias, now.Add(loginAttemptExpiration))
 			if att {
@@ -571,7 +571,7 @@ func getVerboseAuthUser(app *App, token string, u *User, verbose bool) *AuthUser
 		if err != nil {
 			log.Error("Login: Unable to get user posts: %v", err)
 		}
-		colls, err := app.db.GetCollections(u, app.cfg.App.Host)
+		colls, err := app.db.GetCollections(u, app.Config().App.Host)
 		if err != nil {
 			log.Error("Login: Unable to get user collections: %v", err)
 		}
@@ -644,7 +644,7 @@ func viewExportPosts(app *App, w http.ResponseWriter, r *http.Request) ([]byte, 
 
 	// Export as CSV
 	if strings.HasSuffix(r.URL.Path, ".csv") {
-		exdata = exportPostsCSV(app.cfg.App.Host, u, posts)
+		exdata = exportPostsCSV(app.Config().App.Host, u, posts)
 		return exdata, filename, err
 	}
 	if strings.HasSuffix(r.URL.Path, ".zip") {
@@ -757,7 +757,7 @@ func viewMyCollectionsAPI(app *App, u *User, w http.ResponseWriter, r *http.Requ
 		return ErrBadRequestedType
 	}
 
-	p, err := app.db.GetCollections(u, app.cfg.App.Host)
+	p, err := app.db.GetCollections(u, app.Config().App.Host)
 	if err != nil {
 		return err
 	}
@@ -780,7 +780,7 @@ func viewArticles(app *App, u *User, w http.ResponseWriter, r *http.Request) err
 		log.Error("unable to fetch flashes: %v", err)
 	}
 
-	c, err := app.db.GetPublishableCollections(u, app.cfg.App.Host)
+	c, err := app.db.GetPublishableCollections(u, app.Config().App.Host)
 	if err != nil {
 		log.Error("unable to fetch collections: %v", err)
 	}
@@ -812,7 +812,7 @@ func viewArticles(app *App, u *User, w http.ResponseWriter, r *http.Request) err
 }
 
 func viewCollections(app *App, u *User, w http.ResponseWriter, r *http.Request) error {
-	c, err := app.db.GetCollections(u, app.cfg.App.Host)
+	c, err := app.db.GetCollections(u, app.Config().App.Host)
 	if err != nil {
 		log.Error("unable to fetch collections: %v", err)
 		return errors.New("No collections")
@@ -843,7 +843,7 @@ func viewCollections(app *App, u *User, w http.ResponseWriter, r *http.Request) 
 		UserPage:         NewUserPage(app, r, u, u.Username+"'s Blogs", f),
 		Collections:      c,
 		UsedCollections:  int(uc),
-		NewBlogsDisabled: !app.cfg.App.CanCreateBlogs(uc),
+		NewBlogsDisabled: !app.Config().App.CanCreateBlogs(uc),
 		Silenced:         silenced,
 	}
 	d.UserPage.SetMessaging(u)
@@ -1029,7 +1029,7 @@ func viewStats(app *App, u *User, w http.ResponseWriter, r *http.Request) error 
 		if c.OwnerID != u.ID {
 			return ErrCollectionNotFound
 		}
-		c.hostName = app.cfg.App.Host
+		c.hostName = app.Config().App.Host
 	}
 
 	topPosts, err := app.db.GetTopPosts(u, alias, c.hostName)
@@ -1067,7 +1067,7 @@ func viewStats(app *App, u *User, w http.ResponseWriter, r *http.Request) error 
 		Silenced:   silenced,
 	}
 	obj.UserPage.CollAlias = c.Alias
-	if app.cfg.App.Federation {
+	if app.Config().App.Federation {
 		folls, err := app.db.GetAPFollowers(c)
 		if err != nil {
 			return err
@@ -1206,7 +1206,7 @@ func getTempInfo(app *App, key string, r *http.Request, w http.ResponseWriter) s
 }
 
 func handleUserDelete(app *App, u *User, w http.ResponseWriter, r *http.Request) error {
-	if !app.cfg.App.OpenDeletion {
+	if !app.Config().App.OpenDeletion {
 		return impart.HTTPError{http.StatusForbidden, "Open account deletion is disabled on this instance."}
 	}
 

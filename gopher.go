@@ -30,19 +30,19 @@ func initGopher(apper Apper) {
 	gopher.ListenAndServe(fmt.Sprintf(":%d", apper.App().Config().Server.GopherPort), nil)
 }
 
-// Utility function to strip the URL from the hostname provided by app.cfg.App.Host
+// Utility function to strip the URL from the hostname provided by app.Config().App.Host
 func stripHostProtocol(app *App) string {
-	u, err := url.Parse(app.cfg.App.Host)
+	u, err := url.Parse(app.Config().App.Host)
 	if err != nil {
 		// Fall back to host, with scheme stripped
-		return string(regexp.MustCompile("^.*://").ReplaceAll([]byte(app.cfg.App.Host), []byte("")))
+		return string(regexp.MustCompile("^.*://").ReplaceAll([]byte(app.Config().App.Host), []byte("")))
 	}
 	return u.Hostname()
 }
 
 func handleGopher(app *App, w gopher.ResponseWriter, r *gopher.Request) error {
 	parts := strings.Split(r.Selector, "/")
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		if parts[1] != "" {
 			return handleGopherCollectionPost(app, w, r)
 		}
@@ -54,9 +54,9 @@ func handleGopher(app *App, w gopher.ResponseWriter, r *gopher.Request) error {
 		return handleGopherCollection(app, w, r)
 	}
 
-	w.WriteInfo(fmt.Sprintf("Welcome to %s", app.cfg.App.SiteName))
+	w.WriteInfo(fmt.Sprintf("Welcome to %s", app.Config().App.SiteName))
 
-	colls, err := app.db.GetPublicCollections(app.cfg.App.Host)
+	colls, err := app.db.GetPublicCollections(app.Config().App.Host)
 	if err != nil {
 		return err
 	}
@@ -64,7 +64,7 @@ func handleGopher(app *App, w gopher.ResponseWriter, r *gopher.Request) error {
 	for _, c := range *colls {
 		w.WriteItem(&gopher.Item{
 			Host:        stripHostProtocol(app),
-			Port:        app.cfg.Server.GopherPort,
+			Port:        app.Config().Server.GopherPort,
 			Type:        gopher.DIRECTORY,
 			Description: c.DisplayTitle(),
 			Selector:    "/" + c.Alias + "/",
@@ -80,7 +80,7 @@ func handleGopherCollection(app *App, w gopher.ResponseWriter, r *gopher.Request
 	var baseSel = "/"
 
 	parts := strings.Split(r.Selector, "/")
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		// sanity check
 		slug = parts[1]
 		if slug != "" {
@@ -104,21 +104,21 @@ func handleGopherCollection(app *App, w gopher.ResponseWriter, r *gopher.Request
 		}
 		baseSel = "/" + c.Alias + "/"
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	w.WriteInfo(c.DisplayTitle())
 	if c.Description != "" {
 		w.WriteInfo(c.Description)
 	}
 
-	posts, err := app.db.GetPosts(app.cfg, c, 0, false, false, false)
+	posts, err := app.db.GetPosts(app.Config(), c, 0, false, false, false)
 	if err != nil {
 		return err
 	}
 
 	for _, p := range *posts {
 		w.WriteItem(&gopher.Item{
-			Port:        app.cfg.Server.GopherPort,
+			Port:        app.Config().Server.GopherPort,
 			Host:        stripHostProtocol(app),
 			Type:        gopher.FILE,
 			Description: p.CreatedDate() + " - " + p.DisplayTitle(),
@@ -134,7 +134,7 @@ func handleGopherCollectionPost(app *App, w gopher.ResponseWriter, r *gopher.Req
 	var err error
 
 	parts := strings.Split(r.Selector, "/")
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		slug = parts[1]
 		c, err = app.db.GetCollectionByID(1)
 		if err != nil {
@@ -148,7 +148,7 @@ func handleGopherCollectionPost(app *App, w gopher.ResponseWriter, r *gopher.Req
 			return err
 		}
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	p, err := app.db.GetPost(slug, c.ID)
 	if err != nil {

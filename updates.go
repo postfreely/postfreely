@@ -108,7 +108,7 @@ func newUpdatesCache(expiry time.Duration) *updatesCache {
 // InitUpdates initializes the updates cache, if the config value is set
 // It uses the defaultUpdatesCacheTime for the cache expiry
 func (app *App) InitUpdates() {
-	if app.cfg.App.UpdateChecks {
+	if app.Config().App.UpdateChecks {
 		app.updates = newUpdatesCache(defaultUpdatesCacheTime)
 	}
 }

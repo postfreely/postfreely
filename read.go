@@ -100,7 +100,7 @@ func (app *App) FetchPublicPosts() (interface{}, error) {
 			log.Error("[READ] Unable to scan row, skipping: %v", err)
 			continue
 		}
-		c.hostName = app.cfg.App.Host
+		c.hostName = app.Config().App.Host
 
 		isCollectionPost := alias.Valid
 		if isCollectionPost {
@@ -116,8 +116,8 @@ func (app *App) FetchPublicPosts() (interface{}, error) {
 		}
 
 		p.extractData()
-		p.handlePremiumContent(c, false, false, app.cfg)
-		p.HTMLContent = template.HTML(applyMarkdown([]byte(p.Content), "", app.cfg))
+		p.handlePremiumContent(c, false, false, app.Config())
+		p.HTMLContent = template.HTML(applyMarkdown([]byte(p.Content), "", app.Config()))
 		fp := p.processPost()
 		if isCollectionPost {
 			fp.Collection = &CollectionObj{Collection: *c}
@@ -144,7 +144,7 @@ func viewLocalTimelineAPI(app *App, w http.ResponseWriter, r *http.Request) erro
 }
 
 func viewLocalTimeline(app *App, w http.ResponseWriter, r *http.Request) error {
-	if !app.cfg.App.LocalTimeline {
+	if !app.Config().App.LocalTimeline {
 		return impart.HTTPError{http.StatusNotFound, "Page doesn't exist."}
 	}
 
@@ -230,17 +230,17 @@ func showLocalTimeline(app *App, w http.ResponseWriter, r *http.Request, page in
 		TotalPages:  ttlPages,
 		SelTopic:    tag,
 	}
-	if app.cfg.App.Chorus {
+	if app.Config().App.Chorus {
 		u := getUserSession(app, r)
 		d.IsAdmin = u != nil && u.IsAdmin()
-		d.CanInvite = canUserInvite(app.cfg, d.IsAdmin)
+		d.CanInvite = canUserInvite(app.Config(), d.IsAdmin)
 	}
 	c, err := getReaderSection(app)
 	if err != nil {
 		return err
 	}
 	d.ContentTitle = c.Title.String
-	d.Content = template.HTML(applyMarkdown([]byte(c.Content), "", app.cfg))
+	d.Content = template.HTML(applyMarkdown([]byte(c.Content), "", app.Config()))
 
 	err = templates["read"].ExecuteTemplate(w, "base", d)
 	if err != nil {
@@ -278,30 +278,30 @@ func handlePostIDRedirect(app *App, w http.ResponseWriter, r *http.Request) erro
 	if !p.CollectionID.Valid {
 		// No collection; send to normal URL
 		// NOTE: not handling single user blogs here since this handler is only used for the Reader
-		return impart.HTTPError{http.StatusFound, app.cfg.App.Host + "/" + postID + ".md"}
+		return impart.HTTPError{http.StatusFound, app.Config().App.Host + "/" + postID + ".md"}
 	}
 
 	c, err := app.db.GetCollectionBy("id = ?", fmt.Sprintf("%d", p.CollectionID.Int64))
 	if err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	// Retrieve collection information and send user to canonical URL
 	return impart.HTTPError{http.StatusFound, c.CanonicalURL() + p.Slug.String}
 }
 
 func viewLocalTimelineFeed(app *App, w http.ResponseWriter, req *http.Request) error {
-	if !app.cfg.App.LocalTimeline {
+	if !app.Config().App.LocalTimeline {
 		return impart.HTTPError{http.StatusNotFound, "Page doesn't exist."}
 	}
 
 	updateTimelineCache(app.timeline, false)
 
 	feed := &Feed{
-		Title:       app.cfg.App.SiteName + " Reader",
-		Link:        &Link{Href: app.cfg.App.Host},
-		Description: "Read the latest posts from " + app.cfg.App.SiteName + ".",
+		Title:       app.Config().App.SiteName + " Reader",
+		Link:        &Link{Href: app.Config().App.Host},
+		Description: "Read the latest posts from " + app.Config().App.SiteName + ".",
 		Created:     time.Now(),
 	}
 
@@ -313,18 +313,18 @@ func viewLocalTimelineFeed(app *App, w http.ResponseWriter, req *http.Request) e
 		}
 
 		title = p.PlainDisplayTitle()
-		permalink = p.CanonicalURL(app.cfg.App.Host)
+		permalink = p.CanonicalURL(app.Config().App.Host)
 		if p.Collection != nil {
 			author = p.Collection.Title
 		} else {
 			author = "Anonymous"
 		}
 		i := &Item{
-			Id:          app.cfg.App.Host + "/read/a/" + p.ID,
+			Id:          app.Config().App.Host + "/read/a/" + p.ID,
 			Title:       title,
 			Link:        &Link{Href: permalink},
 			Description: "<![CDATA[" + stripmd.Strip(p.Content) + "]]>",
-			Content:     applyMarkdown([]byte(p.Content), "", app.cfg),
+			Content:     applyMarkdown([]byte(p.Content), "", app.Config()),
 			Author:      &Author{author, ""},
 			Created:     p.Created,
 			Updated:     p.Updated,

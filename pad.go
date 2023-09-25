@@ -25,7 +25,7 @@ func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {
 	action := vars["action"]
 	slug := vars["slug"]
 	collAlias := vars["collection"]
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		// TODO: refactor all of this, especially for single-user blogs
 		c, err := app.db.GetCollectionByID(1)
 		if err != nil {
@@ -49,7 +49,7 @@ func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {
 	}
 	var err error
 	if appData.User != nil {
-		appData.Blogs, err = app.db.GetPublishableCollections(appData.User, app.cfg.App.Host)
+		appData.Blogs, err = app.db.GetPublishableCollections(appData.User, app.Config().App.Host)
 		if err != nil {
 			log.Error("Unable to get user's blogs for Pad: %v", err)
 		}
@@ -62,7 +62,7 @@ func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 
-	padTmpl := app.cfg.App.Editor
+	padTmpl := app.Config().App.Editor
 	if templates[padTmpl] == nil {
 		if padTmpl != "" {
 			log.Info("No template '%s' found. Falling back to default 'pad' template.", padTmpl)
@@ -96,7 +96,7 @@ func handleViewPad(app *App, w http.ResponseWriter, r *http.Request) error {
 			log.Error("Unable to GetCollectionForPad: %s", err)
 			return err
 		}
-		appData.EditCollection.hostName = app.cfg.App.Host
+		appData.EditCollection.hostName = app.Config().App.Host
 	} else {
 		// Editing a floating article
 		appData.Post = getRawPost(app, action)
@@ -158,7 +158,7 @@ func handleViewMeta(app *App, w http.ResponseWriter, r *http.Request) error {
 			// TODO: add ErrForbiddenEditPost message to flashes
 			return impart.HTTPError{http.StatusFound, r.URL.Path[:strings.LastIndex(r.URL.Path, "/meta")]}
 		}
-		if app.cfg.App.SingleUser {
+		if app.Config().App.SingleUser {
 			// TODO: optimize this query just like we do in GetCollectionForPad (?)
 			appData.EditCollection, err = app.db.GetCollectionByID(1)
 		} else {
@@ -167,7 +167,7 @@ func handleViewMeta(app *App, w http.ResponseWriter, r *http.Request) error {
 		if err != nil {
 			return err
 		}
-		appData.EditCollection.hostName = app.cfg.App.Host
+		appData.EditCollection.hostName = app.Config().App.Host
 	} else {
 		// Editing a floating article
 		appData.Post = getRawPost(app, action)

@@ -2110,7 +2110,7 @@ func (db *datastore) ChangeSettings(app *App, u *User, s *userSettings) error {
 			// Username is invalid
 			return *ie
 		}
-		if !author.IsValidUsername(app.cfg, newUsername) {
+		if !author.IsValidUsername(app.Config(), newUsername) {
 			// Ensure the username is syntactically correct.
 			return impart.HTTPError{http.StatusPreconditionFailed, "Username isn't valid."}
 		}
