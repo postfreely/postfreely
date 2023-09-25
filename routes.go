@@ -21,6 +21,8 @@ import (
 	"github.com/writeas/go-webfinger"
 	"github.com/writeas/web-core/log"
 	"github.com/writefreely/go-nodeinfo"
+
+	"github.com/postfreely/postfreely/www"
 )
 
 // InitStaticRoutes adds routes for serving static files.
@@ -28,7 +30,7 @@ import (
 func (app *App) InitStaticRoutes(r *mux.Router) {
 	// Handle static files
 	fs := http.FileServer(http.Dir(filepath.Join(app.cfg.Server.StaticParentDir, staticDir)))
-	fs = cacheControl(fs)
+	fs = www.CacheControl(fs)
 	app.shttp = http.NewServeMux()
 	app.shttp.Handle("/", fs)
 	r.PathPrefix("/").Handler(fs)
