@@ -999,7 +999,7 @@ func handleViewCollectionTag(app *App, w http.ResponseWriter, r *http.Request) e
 	ttlPosts := len(taggedPostIDs)
 	pagePosts := coll.Format.PostsPerPage()
 	coll.TotalPages = int(math.Ceil(float64(ttlPosts) / float64(pagePosts)))
-	if coll.TotalPages > 0 && page > coll.TotalPages {
+	if coll.TotalPages > 0 && collectionPage > coll.TotalPages {
 		redirURL := fmt.Sprintf("/page/%d", coll.TotalPages)
 		if !app.cfg.App.SingleUser {
 			redirURL = fmt.Sprintf("/%s%s%s", cr.prefix, coll.Alias, redirURL)
