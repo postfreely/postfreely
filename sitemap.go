@@ -46,11 +46,11 @@ func handleViewSitemap(app *App, w http.ResponseWriter, r *http.Request) error {
 		alias = subdomain
 	}
 
-	host := fmt.Sprintf("%s/%s/", app.cfg.App.Host, alias)
+	host := fmt.Sprintf("%s/%s/", app.Config().App.Host, alias)
 	var c *Collection
 	var err error
 	pre := "/"
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -58,7 +58,7 @@ func handleViewSitemap(app *App, w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	if !isSubdomain {
 		pre += alias + "/"
@@ -66,7 +66,7 @@ func handleViewSitemap(app *App, w http.ResponseWriter, r *http.Request) error {
 	host = c.CanonicalURL()
 
 	sm := buildSitemap(host, pre)
-	posts, err := app.db.GetPosts(app.cfg, c, 0, false, false, false)
+	posts, err := app.db.GetPosts(app.Config(), c, 0, false, false, false)
 	if err != nil {
 		log.Error("Error getting posts: %v", err)
 		return err

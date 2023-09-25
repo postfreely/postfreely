@@ -458,7 +458,7 @@ func handleRenderMarkdown(app *App, w http.ResponseWriter, r *http.Request) erro
 	out := struct {
 		Body string `json:"body"`
 	}{
-		Body: applyMarkdown([]byte(in.RawBody), in.CollectionURL, app.cfg),
+		Body: applyMarkdown([]byte(in.RawBody), in.CollectionURL, app.Config()),
 	}
 
 	return impart.WriteSuccess(w, out, http.StatusOK)

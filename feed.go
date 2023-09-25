@@ -27,7 +27,7 @@ func ViewFeed(app *App, w http.ResponseWriter, req *http.Request) error {
 	// Display collection if this is a collection
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -44,7 +44,7 @@ func ViewFeed(app *App, w http.ResponseWriter, req *http.Request) error {
 	if silenced {
 		return ErrCollectionNotFound
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	if c.IsPrivate() || c.IsProtected() {
 		return ErrCollectionNotFound
@@ -65,9 +65,9 @@ func ViewFeed(app *App, w http.ResponseWriter, req *http.Request) error {
 
 	tag := mux.Vars(req)["tag"]
 	if tag != "" {
-		coll.Posts, _ = app.db.GetPostsTagged(app.cfg, c, tag, 1, false)
+		coll.Posts, _ = app.db.GetPostsTagged(app.Config(), c, tag, 1, false)
 	} else {
-		coll.Posts, _ = app.db.GetPosts(app.cfg, c, 1, false, true, false)
+		coll.Posts, _ = app.db.GetPosts(app.Config(), c, 1, false, true, false)
 	}
 
 	author := ""

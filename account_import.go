@@ -76,7 +76,7 @@ func handleImport(app *App, u *User, w http.ResponseWriter, r *http.Request) err
 			_ = addSessionFlash(app, w, r, err.Message, nil)
 			return err
 		}
-		coll.hostName = app.cfg.App.Host
+		coll.hostName = app.Config().App.Host
 	}
 
 	fileDates := make(map[string]int64)
@@ -163,7 +163,7 @@ func handleImport(app *App, u *User, w http.ResponseWriter, r *http.Request) err
 		}
 
 		// Federate post, if necessary
-		if app.cfg.App.Federation && coll.ID > 0 {
+		if app.Config().App.Federation && coll.ID > 0 {
 			go federatePost(
 				app,
 				&PublicPost{

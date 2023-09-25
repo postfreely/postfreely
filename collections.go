@@ -472,11 +472,11 @@ func newCollection(app *App, w http.ResponseWriter, r *http.Request) error {
 		return ErrUserSilenced
 	}
 
-	if !author.IsValidUsername(app.cfg, c.Alias) {
+	if !author.IsValidUsername(app.Config(), c.Alias) {
 		return impart.HTTPError{http.StatusPreconditionFailed, "Collection alias isn't valid."}
 	}
 
-	coll, err := app.db.CreateCollection(app.cfg, c.Alias, c.Title, userID)
+	coll, err := app.db.CreateCollection(app.Config(), c.Alias, c.Title, userID)
 	if err != nil {
 		// TODO: handle this
 		return err
@@ -526,7 +526,7 @@ func fetchCollection(app *App, w http.ResponseWriter, r *http.Request) error {
 	if err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	// Redirect users who aren't requesting JSON
 	reqJSON := IsJSON(r)
@@ -570,7 +570,7 @@ func fetchCollectionPosts(app *App, w http.ResponseWriter, r *http.Request) erro
 	if err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	// Check permissions
 	userID, err := apiCheckCollectionPermissions(app, r, c)
@@ -588,7 +588,7 @@ func fetchCollectionPosts(app *App, w http.ResponseWriter, r *http.Request) erro
 		}
 	}
 
-	ps, err := app.db.GetPosts(app.cfg, c, collectionPage, isCollOwner, false, false)
+	ps, err := app.db.GetPosts(app.Config(), c, collectionPage, isCollOwner, false, false)
 	if err != nil {
 		return err
 	}
@@ -701,7 +701,7 @@ func processCollectionPermissions(app *App, cr *collectionReq, u *User, w http.R
 	// Display collection if this is a collection
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(cr.alias)
@@ -734,7 +734,7 @@ func processCollectionPermissions(app *App, cr *collectionReq, u *User, w http.R
 		}
 		return nil, err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	// Update CollectionRequest to reflect owner status
 	cr.isCollOwner = u != nil && u.ID == c.OwnerID
@@ -846,7 +846,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 	if c == nil || err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	silenced, err := app.db.IsUserSilenced(c.OwnerID)
 	if err != nil {
@@ -869,13 +869,13 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 	coll.TotalPages = int(math.Ceil(float64(coll.TotalPosts) / float64(coll.Format.PostsPerPage())))
 	if coll.TotalPages > 0 && collectionPage > coll.TotalPages {
 		redirURL := fmt.Sprintf("/page/%d", coll.TotalPages)
-		if !app.cfg.App.SingleUser {
+		if !app.Config().App.SingleUser {
 			redirURL = fmt.Sprintf("/%s%s%s", cr.prefix, coll.Alias, redirURL)
 		}
 		return impart.HTTPError{http.StatusFound, redirURL}
 	}
 
-	coll.Posts, _ = app.db.GetPosts(app.cfg, c, collectionPage, cr.isCollOwner, false, false)
+	coll.Posts, _ = app.db.GetPosts(app.Config(), c, collectionPage, cr.isCollOwner, false, false)
 
 	// Serve collection
 	displayPage := CollectionPage{
@@ -887,7 +887,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 		CollAlias:         c.Alias,
 	}
 	displayPage.IsAdmin = u != nil && u.IsAdmin()
-	displayPage.CanInvite = canUserInvite(app.cfg, displayPage.IsAdmin)
+	displayPage.CanInvite = canUserInvite(app.Config(), displayPage.IsAdmin)
 	var owner *User
 	if u != nil {
 		displayPage.Username = u.Username
@@ -897,7 +897,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 			owner = u
 			displayPage.CanPin = true
 
-			pubColls, err := app.db.GetPublishableCollections(owner, app.cfg.App.Host)
+			pubColls, err := app.db.GetPublishableCollections(owner, app.Config().App.Host)
 			if err != nil {
 				log.Error("unable to fetch collections: %v", err)
 			}
@@ -926,7 +926,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 	displayPage.Monetization = app.db.GetCollectionAttribute(coll.ID, "monetization_pointer")
 
 	collTmpl := "collection"
-	if app.cfg.App.Chorus {
+	if app.Config().App.Chorus {
 		collTmpl = "chorus-collection"
 	}
 	err = templates[collTmpl].ExecuteTemplate(w, "collection", displayPage)
@@ -1001,13 +1001,13 @@ func handleViewCollectionTag(app *App, w http.ResponseWriter, r *http.Request) e
 	coll.TotalPages = int(math.Ceil(float64(ttlPosts) / float64(pagePosts)))
 	if coll.TotalPages > 0 && collectionPage > coll.TotalPages {
 		redirURL := fmt.Sprintf("/page/%d", coll.TotalPages)
-		if !app.cfg.App.SingleUser {
+		if !app.Config().App.SingleUser {
 			redirURL = fmt.Sprintf("/%s%s%s", cr.prefix, coll.Alias, redirURL)
 		}
 		return impart.HTTPError{http.StatusFound, redirURL}
 	}
 
-  coll.Posts, _ = app.db.GetPostsTagged(app.cfg, c, tag, collectionPage, cr.isCollOwner)
+  coll.Posts, _ = app.db.GetPostsTagged(app.Config(), c, tag, collectionPage, cr.isCollOwner)
 	if coll.Posts != nil && len(*coll.Posts) == 0 {
 		return ErrCollectionPageNotFound
 	}
@@ -1030,7 +1030,7 @@ func handleViewCollectionTag(app *App, w http.ResponseWriter, r *http.Request) e
 			owner = u
 			displayPage.CanPin = true
 
-			pubColls, err := app.db.GetPublishableCollections(owner, app.cfg.App.Host)
+			pubColls, err := app.db.GetPublishableCollections(owner, app.Config().App.Host)
 			if err != nil {
 				log.Error("unable to fetch collections: %v", err)
 			}
@@ -1099,13 +1099,13 @@ func handleViewCollectionLang(app *App, w http.ResponseWriter, r *http.Request) 
 	coll.TotalPages = int(math.Ceil(float64(ttlPosts) / float64(pagePosts)))
 	if coll.TotalPages > 0 && page > coll.TotalPages {
 		redirURL := fmt.Sprintf("/lang:%s/page/%d", lang, coll.TotalPages)
-		if !app.cfg.App.SingleUser {
+		if !app.Config().App.SingleUser {
 			redirURL = fmt.Sprintf("/%s%s%s", cr.prefix, coll.Alias, redirURL)
 		}
 		return impart.HTTPError{http.StatusFound, redirURL}
 	}
 
-	coll.Posts, _ = app.db.GetLangPosts(app.cfg, c, lang, page, cr.isCollOwner)
+	coll.Posts, _ = app.db.GetLangPosts(app.Config(), c, lang, page, cr.isCollOwner)
 	if err != nil {
 		return ErrCollectionPageNotFound
 	}
@@ -1131,7 +1131,7 @@ func handleViewCollectionLang(app *App, w http.ResponseWriter, r *http.Request) 
 			owner = u
 			displayPage.CanPin = true
 
-			pubColls, err := app.db.GetPublishableCollections(owner, app.cfg.App.Host)
+			pubColls, err := app.db.GetPublishableCollections(owner, app.Config().App.Host)
 			if err != nil {
 				log.Error("unable to fetch collections: %v", err)
 			}
@@ -1159,7 +1159,7 @@ func handleViewCollectionLang(app *App, w http.ResponseWriter, r *http.Request) 
 	displayPage.Monetization = app.db.GetCollectionAttribute(coll.ID, "monetization_pointer")
 
 	collTmpl := "collection"
-	if app.cfg.App.Chorus {
+	if app.Config().App.Chorus {
 		collTmpl = "chorus-collection"
 	}
 	err = templates[collTmpl].ExecuteTemplate(w, "collection", displayPage)
@@ -1182,7 +1182,7 @@ func handleCollectionPostRedirect(app *App, w http.ResponseWriter, r *http.Reque
 
 	// Normalize the URL, redirecting user to consistent post URL
 	loc := fmt.Sprintf("/%s", slug)
-	if !app.cfg.App.SingleUser {
+	if !app.Config().App.SingleUser {
 		loc = fmt.Sprintf("/%s/%s", cr.alias, slug)
 	}
 	return impart.HTTPError{http.StatusFound, loc}
@@ -1352,7 +1352,7 @@ func handleWebCollectionUnlock(app *App, w http.ResponseWriter, r *http.Request)
 	}
 
 	next := "/" + readReq.Next
-	if !app.cfg.App.SingleUser {
+	if !app.Config().App.SingleUser {
 		next = "/" + readReq.Alias + next
 	}
 	return impart.HTTPError{http.StatusFound, next}
@@ -1387,7 +1387,7 @@ func handleLogOutCollection(app *App, w http.ResponseWriter, r *http.Request) er
 	alias := collectionAliasFromReq(r)
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)

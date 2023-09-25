@@ -414,7 +414,7 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 			Direction:   d,
 		}
 		if !isRaw {
-			post.HTMLContent = template.HTML(applyMarkdown([]byte(content), "", app.cfg))
+			post.HTMLContent = template.HTML(applyMarkdown([]byte(content), "", app.Config()))
 			post.Images = extractImages(post.Content)
 		}
 	}
@@ -481,7 +481,7 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		}{
 			AnonymousPost: post,
 			StaticPage:    pageForReq(app, r),
-			SiteURL:       app.cfg.App.Host,
+			SiteURL:       app.Config().App.Host,
 		}
 		if u = getUserSession(app, r); u != nil {
 			postPage.Username = u.Username
@@ -620,7 +620,7 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 	var newPost = &PublicPost{}
 	var coll *Collection
 	if accessToken != "" {
-		newPost, err = app.db.CreateOwnedPost(p, accessToken, collAlias, app.cfg.App.Host)
+		newPost, err = app.db.CreateOwnedPost(p, accessToken, collAlias, app.Config().App.Host)
 	} else {
 		//return ErrNotLoggedIn
 		// TODO: verify user is logged in
@@ -630,7 +630,7 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 			if err != nil {
 				return err
 			}
-			coll.hostName = app.cfg.App.Host
+			coll.hostName = app.Config().App.Host
 			if u != nil && coll.OwnerID != u.ID {
 				return ErrForbiddenCollection
 			}
@@ -649,12 +649,12 @@ func newPost(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	newPost.extractData()
 	newPost.OwnerName = username
-	newPost.URL = newPost.CanonicalURL(app.cfg.App.Host)
+	newPost.URL = newPost.CanonicalURL(app.Config().App.Host)
 
 	// Write success now
 	response := impart.WriteSuccess(w, newPost, http.StatusCreated)
 
-	if newPost.Collection != nil && !app.cfg.App.Private && app.cfg.App.Federation && !newPost.Created.After(time.Now()) {
+	if newPost.Collection != nil && !app.Config().App.Private && app.Config().App.Federation && !newPost.Created.After(time.Now()) {
 		go federatePost(app, newPost, newPost.Collection.ID, false)
 	}
 
@@ -762,8 +762,8 @@ func existingPost(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	if pRes.CollectionID.Valid {
 		coll, err := app.db.GetCollectionBy("id = ?", pRes.CollectionID.Int64)
-		if err == nil && !app.cfg.App.Private && app.cfg.App.Federation {
-			coll.hostName = app.cfg.App.Host
+		if err == nil && !app.Config().App.Private && app.Config().App.Federation {
+			coll.hostName = app.Config().App.Host
 			pRes.Collection = &CollectionObj{Collection: *coll}
 			go federatePost(app, pRes, pRes.Collection.ID, true)
 		}
@@ -779,12 +779,12 @@ func existingPost(app *App, w http.ResponseWriter, r *http.Request) error {
 	redirect := "/" + postID + "/meta"
 	if collectionAlias != "" {
 		collPre := "/" + collectionAlias
-		if app.cfg.App.SingleUser {
+		if app.Config().App.SingleUser {
 			collPre = ""
 		}
 		redirect = collPre + "/" + pRes.Slug.String + "/edit/meta"
 	} else {
-		if app.cfg.App.SingleUser {
+		if app.Config().App.SingleUser {
 			redirect = "/d" + redirect
 		}
 	}
@@ -861,7 +861,7 @@ func deletePost(app *App, w http.ResponseWriter, r *http.Request) error {
 				log.Error("Unable to get collection: %v", err)
 				return err
 			}
-			if app.cfg.App.Federation {
+			if app.Config().App.Federation {
 				// First fetch full post for federation
 				pp, err = app.db.GetOwnedPost(friendlyID, ownerID)
 				if err != nil {
@@ -903,7 +903,7 @@ func deletePost(app *App, w http.ResponseWriter, r *http.Request) error {
 	if t != nil {
 		t.Commit()
 	}
-	if coll != nil && !app.cfg.App.Private && app.cfg.App.Federation {
+	if coll != nil && !app.Config().App.Private && app.Config().App.Federation {
 		go deleteFederatedPost(app, pp, collID.Int64)
 	}
 
@@ -950,18 +950,18 @@ func addPost(app *App, w http.ResponseWriter, r *http.Request) error {
 	collAlias := vars["alias"]
 
 	// Update all given posts
-	res, err := app.db.ClaimPosts(app.cfg, ownerID, collAlias, claims)
+	res, err := app.db.ClaimPosts(app.Config(), ownerID, collAlias, claims)
 	if err != nil {
 		return err
 	}
 
-	if !app.cfg.App.Private && app.cfg.App.Federation {
+	if !app.Config().App.Private && app.Config().App.Federation {
 		for _, pRes := range *res {
 			if pRes.Code != http.StatusOK {
 				continue
 			}
 			if !pRes.Post.Created.After(time.Now()) {
-				pRes.Post.Collection.hostName = app.cfg.App.Host
+				pRes.Post.Collection.hostName = app.Config().App.Host
 				go federatePost(app, pRes.Post, pRes.Post.Collection.ID, false)
 			}
 		}
@@ -1105,7 +1105,7 @@ func fetchPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		}
 	}
 	if coll != nil {
-		coll.hostName = app.cfg.App.Host
+		coll.hostName = app.Config().App.Host
 		_, err = apiCheckCollectionPermissions(app, r, coll)
 		if err != nil {
 			return err
@@ -1167,7 +1167,7 @@ func (p *PublicPost) CanonicalURL(hostName string) string {
 }
 
 func (p *PublicPost) ActivityObject(app *App) *activitystreams.Object {
-	cfg := app.cfg
+	cfg := app.Config()
 	var o *activitystreams.Object
 	if cfg.App.NotesOnly || strings.Index(p.Content, "\n\n") == -1 {
 		o = activitystreams.NewNoteObject()
@@ -1327,7 +1327,7 @@ func getRawCollectionPost(app *App, slug, collAlias string) *RawPost {
 	var views int64
 	var err error
 
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		err = app.db.QueryRow("SELECT id, title, content, text_appearance, language, rtl, view_count, created, updated, owner_id FROM posts WHERE slug = ? AND collection_id = 1", slug).Scan(&id, &title, &content, &font, &lang, &isRTL, &views, &created, &updated, &ownerID)
 	} else {
 		err = app.db.QueryRow("SELECT id, title, content, text_appearance, language, rtl, view_count, created, updated, owner_id FROM posts WHERE slug = ? AND collection_id = (SELECT id FROM collections WHERE alias = ?)", slug, collAlias).Scan(&id, &title, &content, &font, &lang, &isRTL, &views, &created, &updated, &ownerID)
@@ -1395,7 +1395,7 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 	// Normalize the URL, redirecting user to consistent post URL
 	if postSlug != strings.ToLower(postSlug) {
 		loc := fmt.Sprintf("/%s", strings.ToLower(postSlug))
-		if !app.cfg.App.SingleUser {
+		if !app.Config().App.SingleUser {
 			loc = "/" + cr.alias + loc
 		}
 		return impart.HTTPError{http.StatusMovedPermanently, loc}
@@ -1403,7 +1403,7 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 
 	// Display collection if this is a collection
 	var c *Collection
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(cr.alias)
@@ -1420,7 +1420,7 @@ func viewCollectionPost(app *App, w http.ResponseWriter, r *http.Request) error 
 		}
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	silenced, err := app.db.IsUserSilenced(c.OwnerID)
 	if err != nil {
@@ -1487,7 +1487,7 @@ Are you sure it was ever here?`,
 	// Check if the authenticated user is the post owner
 	p.IsOwner = u != nil && u.ID == p.OwnerID.Int64
 	p.Collection = coll
-	p.IsTopLevel = app.cfg.App.SingleUser
+	p.IsTopLevel = app.Config().App.SingleUser
 
 	// Only allow a post owner or admin to view a post for silenced collections
 	if silenced && !p.IsOwner && (u == nil || !u.IsAdmin()) {
@@ -1535,7 +1535,7 @@ Are you sure it was ever here?`,
 		p.extractData()
 		p.Content = strings.Replace(p.Content, "<!--more-->", "", 1)
 		// TODO: move this to function
-		p.formatContent(app.cfg, cr.isCollOwner, true)
+		p.formatContent(app.Config(), cr.isCollOwner, true)
 		tp := CollectionPostPage{
 			PublicPost:     p,
 			StaticPage:     pageForReq(app, r),
@@ -1546,7 +1546,7 @@ Are you sure it was ever here?`,
 			CollAlias:      c.Alias,
 		}
 		tp.IsAdmin = u != nil && u.IsAdmin()
-		tp.CanInvite = canUserInvite(app.cfg, tp.IsAdmin)
+		tp.CanInvite = canUserInvite(app.Config(), tp.IsAdmin)
 		tp.PinnedPosts, _ = app.db.GetPinnedPosts(coll, p.IsOwner)
 		tp.IsPinned = len(*tp.PinnedPosts) > 0 && PostsContains(tp.PinnedPosts, p)
 		tp.Monetization = coll.Monetization
@@ -1556,7 +1556,7 @@ Are you sure it was ever here?`,
 			w.WriteHeader(http.StatusNotFound)
 		}
 		postTmpl := "collection-post"
-		if app.cfg.App.Chorus {
+		if app.Config().App.Chorus {
 			postTmpl = "chorus-collection-post"
 		}
 		if err := templates[postTmpl].ExecuteTemplate(w, "post", tp); err != nil {

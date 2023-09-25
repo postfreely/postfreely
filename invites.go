@@ -60,7 +60,7 @@ func (i Invite) ExpiresFriendly() string {
 
 func handleViewUserInvites(app *App, u *User, w http.ResponseWriter, r *http.Request) error {
 	// Don't show page if instance doesn't allow it
-	if !(app.cfg.App.UserInvites != "" && (u.IsAdmin() || app.cfg.App.UserInvites != "admin")) {
+	if !(app.Config().App.UserInvites != "" && (u.IsAdmin() || app.Config().App.UserInvites != "admin")) {
 		return impart.HTTPError{http.StatusNotFound, ""}
 	}
 
@@ -163,7 +163,7 @@ func handleViewInvite(app *App, w http.ResponseWriter, r *http.Request) error {
 			Invite  *Invite
 			Expired bool
 		}{
-			UserPage: NewUserPage(app, r, u, "Invite to "+app.cfg.App.SiteName, nil),
+			UserPage: NewUserPage(app, r, u, "Invite to "+app.Config().App.SiteName, nil),
 			Invite:   i,
 			Expired:  expired,
 		}
@@ -179,7 +179,7 @@ func handleViewInvite(app *App, w http.ResponseWriter, r *http.Request) error {
 		Invite  string
 	}{
 		StaticPage:   pageForReq(app, r),
-		OAuthButtons: NewOAuthButtons(app.cfg),
+		OAuthButtons: NewOAuthButtons(app.Config()),
 		Invite:       inviteCode,
 	}
 

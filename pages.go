@@ -27,11 +27,11 @@ func getAboutPage(app *App) (*instanceContent, error) {
 		c = &instanceContent{
 			ID:      "about",
 			Type:    "page",
-			Content: defaultAboutPage(app.cfg),
+			Content: defaultAboutPage(app.Config()),
 		}
 	}
 	if !c.Title.Valid {
-		c.Title = defaultAboutTitle(app.cfg)
+		c.Title = defaultAboutTitle(app.Config())
 	}
 	return c, nil
 }
@@ -71,7 +71,7 @@ func getPrivacyPage(app *App) (*instanceContent, error) {
 		c = &instanceContent{
 			ID:      "privacy",
 			Type:    "page",
-			Content: defaultPrivacyPolicy(app.cfg),
+			Content: defaultPrivacyPolicy(app.Config()),
 			Updated: defaultPageUpdatedTime,
 		}
 	}
@@ -97,7 +97,7 @@ func defaultContactPage(app *App) string {
 	if err != nil {
 		return ""
 	}
-	return `_` + app.cfg.App.SiteName + `_ is administered by: [**` + c.Alias + `**](/` + c.Alias + `/).
+	return `_` + app.Config().App.SiteName + `_ is administered by: [**` + c.Alias + `**](/` + c.Alias + `/).
 
 Contact them at this email address: _EMAIL GOES HERE_.
 
@@ -123,7 +123,7 @@ func getLandingBanner(app *App) (*instanceContent, error) {
 		c = &instanceContent{
 			ID:      "landing-banner",
 			Type:    "section",
-			Content: defaultLandingBanner(app.cfg),
+			Content: defaultLandingBanner(app.Config()),
 			Updated: defaultPageUpdatedTime,
 		}
 	}
@@ -139,7 +139,7 @@ func getLandingBody(app *App) (*instanceContent, error) {
 		c = &instanceContent{
 			ID:      "landing-body",
 			Type:    "section",
-			Content: defaultLandingBody(app.cfg),
+			Content: defaultLandingBody(app.Config()),
 			Updated: defaultPageUpdatedTime,
 		}
 	}
@@ -179,12 +179,12 @@ func getReaderSection(app *App) (*instanceContent, error) {
 		c = &instanceContent{
 			ID:      "reader",
 			Type:    "section",
-			Content: defaultReaderBanner(app.cfg),
+			Content: defaultReaderBanner(app.Config()),
 			Updated: defaultPageUpdatedTime,
 		}
 	}
 	if !c.Title.Valid {
-		c.Title = defaultReaderTitle(app.cfg)
+		c.Title = defaultReaderTitle(app.Config())
 	}
 	return c, nil
 }

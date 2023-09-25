@@ -237,7 +237,7 @@ func (app *App) ReqLog(r *http.Request, status int, timeSince time.Duration) str
 // handleViewHome shows page at root path. It checks the configuration and
 // authentication state to show the correct page.
 func handleViewHome(app *App, w http.ResponseWriter, r *http.Request) error {
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		// Render blog index
 		return handleViewCollection(app, w, r)
 	}
@@ -248,10 +248,10 @@ func handleViewHome(app *App, w http.ResponseWriter, r *http.Request) error {
 		// Show correct page based on user auth status and configured landing path
 		u := getUserSession(app, r)
 
-		if app.cfg.App.Chorus {
+		if app.Config().App.Chorus {
 			// This instance is focused on reading, so show Reader on home route if not
 			// private or a private-instance user is logged in.
-			if !app.cfg.App.Private || u != nil {
+			if !app.Config().App.Private || u != nil {
 				return viewLocalTimeline(app, w, r)
 			}
 		}
@@ -261,11 +261,11 @@ func handleViewHome(app *App, w http.ResponseWriter, r *http.Request) error {
 			return handleViewPad(app, w, r)
 		}
 
-		if app.cfg.App.Private {
+		if app.Config().App.Private {
 			return viewLogin(app, w, r)
 		}
 
-		if land := app.cfg.App.LandingPath(); land != "/" {
+		if land := app.Config().App.LandingPath(); land != "/" {
 			return impart.HTTPError{http.StatusFound, land}
 		}
 	}
@@ -295,14 +295,14 @@ func handleViewLanding(app *App, w http.ResponseWriter, r *http.Request) error {
 		log.Error("unable to get landing banner: %v", err)
 		return impart.HTTPError{http.StatusInternalServerError, fmt.Sprintf("Could not get banner: %v", err)}
 	}
-	p.Banner = template.HTML(applyMarkdown([]byte(banner.Content), "", app.cfg))
+	p.Banner = template.HTML(applyMarkdown([]byte(banner.Content), "", app.Config()))
 
 	content, err := getLandingBody(app)
 	if err != nil {
 		log.Error("unable to get landing content: %v", err)
 		return impart.HTTPError{http.StatusInternalServerError, fmt.Sprintf("Could not get content: %v", err)}
 	}
-	p.Content = template.HTML(applyMarkdown([]byte(content.Content), "", app.cfg))
+	p.Content = template.HTML(applyMarkdown([]byte(content.Content), "", app.Config()))
 
 	// Get error messages
 	session, err := app.sessionStore.Get(r, cookieName)
@@ -356,7 +356,7 @@ func handleTemplatedPage(app *App, w http.ResponseWriter, r *http.Request, t *te
 			return err
 		}
 		p.ContentTitle = c.Title.String
-		p.Content = template.HTML(applyMarkdown([]byte(c.Content), "", app.cfg))
+		p.Content = template.HTML(applyMarkdown([]byte(c.Content), "", app.Config()))
 		p.PlainContent = shortPostDescription(stripmd.Strip(c.Content))
 		if !c.Updated.IsZero() {
 			p.Updated = c.Updated.Format("January 2, 2006")
@@ -373,7 +373,7 @@ func handleTemplatedPage(app *App, w http.ResponseWriter, r *http.Request, t *te
 
 func pageForReq(app *App, r *http.Request) page.StaticPage {
 	p := page.StaticPage{
-		AppCfg:  app.cfg.App,
+		AppCfg:  app.Config().App,
 		Path:    r.URL.Path,
 		Version: "v" + softwareVer,
 	}
@@ -400,10 +400,10 @@ func pageForReq(app *App, r *http.Request) page.StaticPage {
 		if u != nil {
 			p.Username = u.Username
 			p.IsAdmin = u.IsAdmin()
-			p.CanInvite = canUserInvite(app.cfg, p.IsAdmin)
+			p.CanInvite = canUserInvite(app.Config(), p.IsAdmin)
 		}
 	}
-	p.CanViewReader = !app.cfg.App.Private || u != nil
+	p.CanViewReader = !app.Config().App.Private || u != nil
 
 	return p
 }
@@ -449,7 +449,7 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 	initActivityPub(apper.App())
 
 	// Handle local timeline, if enabled
-	if apper.App().cfg.App.LocalTimeline {
+	if apper.App().Config().App.LocalTimeline {
 		log.Info("Initializing local timeline...")
 		initLocalTimeline(apper.App())
 	}
@@ -460,8 +460,8 @@ func Initialize(apper Apper, debug bool) (*App, error) {
 func Serve(app *App, r *mux.Router) {
 	log.Info("Going to serve...")
 
-	isSingleUser = app.cfg.App.SingleUser
-	app.cfg.Server.Dev = debugging
+	isSingleUser = app.Config().App.SingleUser
+	app.Config().Server.Dev = debugging
 
 	// Handle shutdown
 	c := make(chan os.Signal, 2)
@@ -475,23 +475,23 @@ func Serve(app *App, r *mux.Router) {
 	}()
 
 	// Start gopher server
-	if app.cfg.Server.GopherPort > 0 && !app.cfg.App.Private {
+	if app.Config().Server.GopherPort > 0 && !app.Config().App.Private {
 		go initGopher(app)
 	}
 
 	// Start web application server
-	var bindAddress = app.cfg.Server.Bind
+	var bindAddress = app.Config().Server.Bind
 	if bindAddress == "" {
 		bindAddress = "localhost"
 	}
 	var err error
-	if app.cfg.IsSecureStandalone() {
-		if app.cfg.Server.Autocert {
+	if app.Config().IsSecureStandalone() {
+		if app.Config().Server.Autocert {
 			m := &autocert.Manager{
 				Prompt: autocert.AcceptTOS,
-				Cache:  autocert.DirCache(app.cfg.Server.TLSCertPath),
+				Cache:  autocert.DirCache(app.Config().Server.TLSCertPath),
 			}
-			host, err := url.Parse(app.cfg.App.Host)
+			host, err := url.Parse(app.Config().App.Host)
 			if err != nil {
 				log.Error("[WARNING] Unable to parse configured host! %s", err)
 				log.Error(`[WARNING] ALL hosts are allowed, which can open you to an attack where
@@ -525,7 +525,7 @@ requests. We recommend supplying a valid host name.`)
 			go func() {
 				log.Info("Serving redirects on http://%s:80", bindAddress)
 				err = http.ListenAndServe(fmt.Sprintf("%s:80", bindAddress), http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					http.Redirect(w, r, app.cfg.App.Host, http.StatusMovedPermanently)
+					http.Redirect(w, r, app.Config().App.Host, http.StatusMovedPermanently)
 				}))
 				log.Error("Unable to start redirect server: %v", err)
 			}()
@@ -533,7 +533,7 @@ requests. We recommend supplying a valid host name.`)
 			log.Info("Serving on https://%s:443", bindAddress)
 			log.Info("Using manual certificates")
 			log.Info("---")
-			err = http.ListenAndServeTLS(fmt.Sprintf("%s:443", bindAddress), app.cfg.Server.TLSCertPath, app.cfg.Server.TLSKeyPath, r)
+			err = http.ListenAndServeTLS(fmt.Sprintf("%s:443", bindAddress), app.Config().Server.TLSCertPath, app.Config().Server.TLSKeyPath, r)
 		}
 	} else {
 		network := "tcp"
@@ -550,7 +550,7 @@ requests. We recommend supplying a valid host name.`)
 				os.Exit(1)
 			}
 		} else {
-			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.cfg.Server.WWWPort)
+			bindAddress = fmt.Sprintf("%s:%d", bindAddress, app.Config().Server.WWWPort)
 		}
 
 		log.Info("Serving on %s://%s", protocol, bindAddress)
@@ -594,14 +594,14 @@ func (app *App) InitDecoder() {
 // tests the connection.
 func ConnectToDatabase(app *App) error {
 	// Check database configuration
-	if app.cfg.Database.Type == dbase.TypeMySQL && app.cfg.Database.User == "" {
+	if app.Config().Database.Type == dbase.TypeMySQL && app.Config().Database.User == "" {
 		return errors.New("Database user not set.")
 	}
-	if app.cfg.Database.Host == "" {
-		app.cfg.Database.Host = "localhost"
+	if app.Config().Database.Host == "" {
+		app.Config().Database.Host = "localhost"
 	}
-	if app.cfg.Database.Database == "" {
-		app.cfg.Database.Database = "writefreely"
+	if app.Config().Database.Database == "" {
+		app.Config().Database.Database = "writefreely"
 	}
 
 	// TODO: check err
@@ -686,7 +686,7 @@ func DoConfig(app *App, configSections string) {
 
 		// Create blog
 		log.Info("Creating user %s...\n", u.Username)
-		err = app.db.CreateUser(app.cfg, u, app.cfg.App.SiteName, "")
+		err = app.db.CreateUser(app.Config(), u, app.Config().App.SiteName, "")
 		if err != nil {
 			log.Error("Unable to create user: %s", err)
 			os.Exit(1)
@@ -702,7 +702,7 @@ func GenerateKeyFiles(app *App) error {
 	app.LoadConfig()
 
 	// Create keys dir if it doesn't exist yet
-	fullKeysDir := filepath.Join(app.cfg.Server.KeysParentDir, keysDir)
+	fullKeysDir := filepath.Join(app.Config().Server.KeysParentDir, keysDir)
 	if _, err := os.Stat(fullKeysDir); os.IsNotExist(err) {
 		err = os.Mkdir(fullKeysDir, 0700)
 		if err != nil {
@@ -845,46 +845,46 @@ func DoDeleteAccount(apper Apper, username string) error {
 }
 
 func connectToDatabase(app *App) {
-	log.Info("Connecting to %s database...", app.cfg.Database.Type)
+	log.Info("Connecting to %s database...", app.Config().Database.Type)
 
 	var db *sql.DB
 	var err error
-	if app.cfg.Database.Type == dbase.TypeMySQL {
-		db, err = sql.Open(app.cfg.Database.Type, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=%s&tls=%t", app.cfg.Database.User, app.cfg.Database.Password, app.cfg.Database.Host, app.cfg.Database.Port, app.cfg.Database.Database, url.QueryEscape(time.Local.String()), app.cfg.Database.TLS))
+	if app.Config().Database.Type == dbase.TypeMySQL {
+		db, err = sql.Open(app.Config().Database.Type, fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8mb4&parseTime=true&loc=%s&tls=%t", app.Config().Database.User, app.Config().Database.Password, app.Config().Database.Host, app.Config().Database.Port, app.Config().Database.Database, url.QueryEscape(time.Local.String()), app.Config().Database.TLS))
 		if err == nil {
 			db.SetMaxOpenConns(50)
 		}
-	} else if app.cfg.Database.Type == dbase.TypeSQLite {
+	} else if app.Config().Database.Type == dbase.TypeSQLite {
 		if !SQLiteEnabled {
-			log.Error("Invalid database type '%s'. Binary wasn't compiled with SQLite3 support.", app.cfg.Database.Type)
+			log.Error("Invalid database type '%s'. Binary wasn't compiled with SQLite3 support.", app.Config().Database.Type)
 			os.Exit(1)
 		}
-		if app.cfg.Database.FileName == "" {
+		if app.Config().Database.FileName == "" {
 			log.Error("SQLite database filename value in config.ini is empty.")
 			os.Exit(1)
 		}
-		db, err = sql.Open("sqlite", app.cfg.Database.FileName+"?parseTime=true&cached=shared")
+		db, err = sql.Open("sqlite", app.Config().Database.FileName+"?parseTime=true&cached=shared")
 		if err == nil {
 			db.SetMaxOpenConns(2)
 		}
 	} else {
-		log.Error("Invalid database type %q. Only %q and %q are supported right now.", app.cfg.Database.Type, dbase.TypeMySQL, dbase.TypeSQLite)
+		log.Error("Invalid database type %q. Only %q and %q are supported right now.", app.Config().Database.Type, dbase.TypeMySQL, dbase.TypeSQLite)
 		os.Exit(1)
 	}
 	if err != nil {
 		log.Error("%s", err)
 		os.Exit(1)
 	}
-	app.db = &datastore{db, app.cfg.Database.Type}
+	app.db = &datastore{db, app.Config().Database.Type}
 }
 
 func shutdown(app *App) {
 	log.Info("Closing database connection...")
 	app.db.Close()
-	if strings.HasPrefix(app.cfg.Server.Bind, "/") {
+	if strings.HasPrefix(app.Config().Server.Bind, "/") {
 		// Clean up socket
 		log.Info("Removing socket file...")
-		err := os.Remove(app.cfg.Server.Bind)
+		err := os.Remove(app.Config().Server.Bind)
 		if err != nil {
 			log.Error("Unable to remove socket: %s", err)
 			os.Exit(1)
@@ -924,8 +924,8 @@ func CreateUser(apper Apper, username, password string, isAdmin bool) error {
 		usernameDesc += " (originally: " + desiredUsername + ")"
 	}
 
-	if !author.IsValidUsername(apper.App().cfg, username) {
-		return fmt.Errorf("Username %s is invalid, reserved, or shorter than configured minimum length (%d characters).", usernameDesc, apper.App().cfg.App.MinUsernameLen)
+	if !author.IsValidUsername(apper.App().Config(), username) {
+		return fmt.Errorf("Username %s is invalid, reserved, or shorter than configured minimum length (%d characters).", usernameDesc, apper.App().Config().App.MinUsernameLen)
 	}
 
 	// Hash the password
@@ -961,7 +961,7 @@ var sqliteSql string
 
 func adminInitDatabase(app *App) error {
 	var dbschema string
-	if app.cfg.Database.Type == dbase.TypeSQLite {
+	if app.Config().Database.Type == dbase.TypeSQLite {
 		dbschema = sqliteSql
 	} else {
 		dbschema = schemaSql

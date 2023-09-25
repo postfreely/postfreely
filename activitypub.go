@@ -49,13 +49,13 @@ const (
 var instanceColl *Collection
 
 func initActivityPub(app *App) {
-	ur, _ := url.Parse(app.cfg.App.Host)
+	ur, _ := url.Parse(app.Config().App.Host)
 	instanceColl = &Collection{
 		ID:       0,
 		Alias:    ur.Host,
 		Title:    ur.Host,
 		db:       app.db,
-		hostName: app.cfg.App.Host,
+		hostName: app.Config().App.Host,
 	}
 }
 
@@ -105,7 +105,7 @@ func handleFetchCollectionActivities(app *App, w http.ResponseWriter, r *http.Re
 	var err error
 	if alias == r.Host {
 		c = instanceColl
-	} else if app.cfg.App.SingleUser {
+	} else if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -113,7 +113,7 @@ func handleFetchCollectionActivities(app *App, w http.ResponseWriter, r *http.Re
 	if err != nil {
 		return err
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	if !c.IsInstanceColl() {
 		silenced, err := app.db.IsUserSilenced(c.OwnerID)
@@ -142,7 +142,7 @@ func handleFetchCollectionOutbox(app *App, w http.ResponseWriter, r *http.Reques
 	// Get base Collection data
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -158,9 +158,9 @@ func handleFetchCollectionOutbox(app *App, w http.ResponseWriter, r *http.Reques
 	if silenced {
 		return ErrCollectionNotFound
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		if alias != c.Alias {
 			return ErrCollectionNotFound
 		}
@@ -182,7 +182,7 @@ func handleFetchCollectionOutbox(app *App, w http.ResponseWriter, r *http.Reques
 	ocp := activitystreams.NewOrderedCollectionPage(accountRoot, "outbox", res.TotalPosts, p)
 	ocp.OrderedItems = []interface{}{}
 
-	posts, err := app.db.GetPosts(app.cfg, c, p, false, true, false)
+	posts, err := app.db.GetPosts(app.Config(), c, p, false, true, false)
 	if err != nil {
 		log.Error("get posts for outbox: %v", err)
 		return err
@@ -209,7 +209,7 @@ func handleFetchCollectionFollowers(app *App, w http.ResponseWriter, r *http.Req
 	// Get base Collection data
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -225,7 +225,7 @@ func handleFetchCollectionFollowers(app *App, w http.ResponseWriter, r *http.Req
 	if silenced {
 		return ErrCollectionNotFound
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	accountRoot := c.FederatedAccount()
 
@@ -264,7 +264,7 @@ func handleFetchCollectionFollowing(app *App, w http.ResponseWriter, r *http.Req
 	// Get base Collection data
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -280,7 +280,7 @@ func handleFetchCollectionFollowing(app *App, w http.ResponseWriter, r *http.Req
 	if silenced {
 		return ErrCollectionNotFound
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	accountRoot := c.FederatedAccount()
 
@@ -306,7 +306,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 	alias := vars["alias"]
 	var c *Collection
 	var err error
-	if app.cfg.App.SingleUser {
+	if app.Config().App.SingleUser {
 		c, err = app.db.GetCollectionByID(1)
 	} else {
 		c, err = app.db.GetCollection(alias)
@@ -323,7 +323,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 	if silenced {
 		return ErrCollectionNotFound
 	}
-	c.hostName = app.cfg.App.Host
+	c.hostName = app.Config().App.Host
 
 	if debugging {
 		dump, err := httputil.DumpRequest(r, true)
@@ -442,7 +442,7 @@ func handleFetchCollectionInbox(app *App, w http.ResponseWriter, r *http.Request
 		}
 		am["@context"] = []string{activitystreams.Namespace}
 
-		err = makeActivityPost(app.cfg.App.Host, p, fullActor.Inbox, am)
+		err = makeActivityPost(app.Config().App.Host, p, fullActor.Inbox, am)
 		if err != nil {
 			log.Error("Unable to make activity POST: %v", err)
 			return
@@ -626,7 +626,7 @@ func deleteFederatedPost(app *App, p *PublicPost, collID int64) error {
 	if debugging {
 		log.Info("Deleting federated post!")
 	}
-	p.Collection.hostName = app.cfg.App.Host
+	p.Collection.hostName = app.Config().App.Host
 	actor := p.Collection.PersonObject(collID)
 	na := p.ActivityObject(app)
 
@@ -659,7 +659,7 @@ func deleteFederatedPost(app *App, p *PublicPost, collID int64) error {
 		// See: https://git.pleroma.social/pleroma/pleroma/issues/1481
 		da.ID += "#Delete"
 
-		err = makeActivityPost(app.cfg.App.Host, actor, si, da)
+		err = makeActivityPost(app.Config().App.Host, actor, si, da)
 		if err != nil {
 			log.Error("Couldn't delete post! %v", err)
 		}
@@ -669,7 +669,7 @@ func deleteFederatedPost(app *App, p *PublicPost, collID int64) error {
 
 func federatePost(app *App, p *PublicPost, collID int64, isUpdate bool) error {
 	// If app is private, do not federate
-	if app.cfg.App.Private {
+	if app.Config().App.Private {
 		return nil
 	}
 
@@ -730,7 +730,7 @@ func federatePost(app *App, p *PublicPost, collID int64, isUpdate bool) error {
 			activity.CC = na.CC
 		}
 		// and post it to that sharedInbox
-		err = makeActivityPost(app.cfg.App.Host, actor, si, activity)
+		err = makeActivityPost(app.Config().App.Host, actor, si, activity)
 		if err != nil {
 			log.Error("Couldn't post! %v", err)
 		}
@@ -756,7 +756,7 @@ func federatePost(app *App, p *PublicPost, collID int64, isUpdate bool) error {
 				log.Error("Unable to find remote user %s. Skipping: %v", tag.HRef, err)
 				continue
 			}
-			err = makeActivityPost(app.cfg.App.Host, actor, remoteUser.Inbox, activity)
+			err = makeActivityPost(app.Config().App.Host, actor, remoteUser.Inbox, activity)
 			if err != nil {
 				log.Error("Couldn't post! %v", err)
 			}
@@ -810,7 +810,7 @@ func getActor(app *App, actorIRI string) (*activitystreams.Person, *RemoteUser, 
 			if iErr.Status == http.StatusNotFound {
 				// Fetch remote actor
 				log.Info("Not found; fetching actor %s remotely", actorIRI)
-				actorResp, err := resolveIRI(app.cfg.App.Host, actorIRI)
+				actorResp, err := resolveIRI(app.Config().App.Host, actorIRI)
 				if err != nil {
 					log.Error("Unable to get actor! %v", err)
 					return nil, nil, impart.HTTPError{http.StatusInternalServerError, "Couldn't fetch actor."}
