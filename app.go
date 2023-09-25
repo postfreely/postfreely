@@ -960,16 +960,17 @@ var schemaSql string
 var sqliteSql string
 
 func adminInitDatabase(app *App) error {
-	var schema string
+	var dbschema string
 	if app.cfg.Database.Type == dbase.TypeSQLite {
-		schema = sqliteSql
+		dbschema = sqliteSql
 	} else {
-		schema = schemaSql
+		dbschema = schemaSql
 	}
 
 	tblReg := regexp.MustCompile("CREATE TABLE (IF NOT EXISTS )?`([a-z_]+)`")
 
-	queries := strings.Split(schema, ";\n")
+	queries := strings.Split(dbschema, ";\n")
+
 	for _, q := range queries {
 		if strings.TrimSpace(q) == "" {
 			continue

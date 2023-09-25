@@ -21,11 +21,12 @@ import (
 
 	. "github.com/gorilla/feeds"
 	"github.com/gorilla/mux"
-	"github.com/postfreely/postfreely/page"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
 	"github.com/writeas/web-core/log"
 	"github.com/writeas/web-core/memo"
+
+	"github.com/postfreely/postfreely/page"
 )
 
 const (
@@ -149,13 +150,13 @@ func viewLocalTimeline(app *App, w http.ResponseWriter, r *http.Request) error {
 
 	vars := mux.Vars(r)
 	var p int
-	page := 1
+	timelinePage := 1
 	p, _ = strconv.Atoi(vars["page"])
 	if p > 0 {
-		page = p
+		timelinePage = p
 	}
 
-	return showLocalTimeline(app, w, r, page, vars["author"], vars["tag"])
+	return showLocalTimeline(app, w, r, timelinePage, vars["author"], vars["tag"])
 }
 
 // updateTimelineCache will reset and update the cache if it is stale or

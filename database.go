@@ -52,14 +52,14 @@ var (
 )
 
 type writestore interface {
-	CreateUser(*config.Config, *User, string, string) error
+	CreateUser(cfg *config.Config, u *User, collectionTitle string, collectionDesc string) error
 	UpdateUserEmail(keys *key.Keychain, userID int64, email string) error
-	UpdateEncryptedUserEmail(int64, []byte) error
-	GetUserByID(int64) (*User, error)
-	GetUserForAuth(string) (*User, error)
-	GetUserForAuthByID(int64) (*User, error)
-	GetUserNameFromToken(string) (string, error)
-	GetUserDataFromToken(string) (int64, string, error)
+	UpdateEncryptedUserEmail(userID int64, encEmail []byte) error
+	GetUserByID(userID int64) (*User, error)
+	GetUserForAuth(username string) (*User, error)
+	GetUserForAuthByID(userID int64) (*User, error)
+	GetUserNameFromToken(accessToken string) (string, error)
+	GetUserDataFromToken(accessToken string) (int64, string, error)
 	GetAPIUser(header string) (*User, error)
 	GetUserID(accessToken string) int64
 	GetUserIDPrivilege(accessToken string) (userID int64, sudo bool)
@@ -84,28 +84,28 @@ type writestore interface {
 	CreateOwnedPost(post *SubmittedPost, accessToken, collAlias, hostName string) (*PublicPost, error)
 	CreatePost(userID, collID int64, post *SubmittedPost) (*Post, error)
 	UpdateOwnedPost(post *AuthenticatedPost, userID int64) error
-	GetEditablePost(id, editToken string) (*PublicPost, error)
-	PostIDExists(id string) bool
-	GetPost(id string, collectionID int64) (*PublicPost, error)
-	GetOwnedPost(id string, ownerID int64) (*PublicPost, error)
-	GetPostProperty(id string, collectionID int64, property string) (interface{}, error)
+	GetEditablePost(postID, editToken string) (*PublicPost, error)
+	PostIDExists(postID string) bool
+	GetPost(postID string, collectionID int64) (*PublicPost, error)
+	GetOwnedPost(postID string, ownerID int64) (*PublicPost, error)
+	GetPostProperty(postID string, collectionID int64, property string) (interface{}, error)
 
-	CreateCollectionFromToken(*config.Config, string, string, string) (*Collection, error)
-	CreateCollection(*config.Config, string, string, int64) (*Collection, error)
+	CreateCollectionFromToken(cfg *config.Config, alias, title, accessToken string) (*Collection, error)
+	CreateCollection(cfg *config.Config, alias, title string, userID int64) (*Collection, error)
 	GetCollectionBy(condition string, value interface{}) (*Collection, error)
 	GetCollection(alias string) (*Collection, error)
 	GetCollectionForPad(alias string) (*Collection, error)
-	GetCollectionByID(id int64) (*Collection, error)
+	GetCollectionByID(collectionID int64) (*Collection, error)
 	UpdateCollection(app *App, c *SubmittedCollection, alias string) error
 	DeleteCollection(alias string, userID int64) error
 
 	UpdatePostPinState(pinned bool, postID string, collID, ownerID, pos int64) error
-	GetLastPinnedPostPos(collID int64) int64
+	GetLastPinnedPostPos(collectionID int64) int64
 	GetPinnedPosts(coll *CollectionObj, includeFuture bool) (*[]PublicPost, error)
 	RemoveCollectionRedirect(t *sql.Tx, alias string) error
 	GetCollectionRedirect(alias string) (new string)
-	IsCollectionAttributeOn(id int64, attr string) bool
-	CollectionHasAttribute(id int64, attr string) bool
+	IsCollectionAttributeOn(collectionID int64, attr string) bool
+	CollectionHasAttribute(collectionID int64, attr string) bool
 
 	CanCollect(cpr *ClaimPostRequest, userID int64) bool
 	AttemptClaim(p *ClaimPostRequest, query string, params []interface{}, slugIdx int) (sql.Result, error)
@@ -119,23 +119,23 @@ type writestore interface {
 
 	GetAPFollowers(c *Collection) (*[]RemoteUser, error)
 	GetAPActorKeys(collectionID int64) ([]byte, []byte)
-	CreateUserInvite(id string, userID int64, maxUses int, expires *time.Time) error
+	CreateUserInvite(inviteID string, userID int64, maxUses int, expires *time.Time) error
 	GetUserInvites(userID int64) (*[]Invite, error)
-	GetUserInvite(id string) (*Invite, error)
-	GetUsersInvitedCount(id string) int64
+	GetUserInvite(inviteID string) (*Invite, error)
+	GetUsersInvitedCount(inviteID string) int64
 	CreateInvitedUser(inviteID string, userID int64) error
 
-	GetDynamicContent(id string) (*instanceContent, error)
-	UpdateDynamicContent(id, title, content, contentType string) error
+	GetDynamicContent(contentID string) (*instanceContent, error)
+	UpdateDynamicContent(contentID, title, content, contentType string) error
 	GetAllUsers(page uint) (*[]User, error)
 	GetAllUsersCount() int64
-	GetUserLastPostTime(id int64) (*time.Time, error)
-	GetCollectionLastPostTime(id int64) (*time.Time, error)
+	GetUserLastPostTime(userID int64) (*time.Time, error)
+	GetCollectionLastPostTime(collectionID int64) (*time.Time, error)
 
-	GetIDForRemoteUser(context.Context, string, string, string) (int64, error)
-	RecordRemoteUserID(context.Context, int64, string, string, string, string) error
-	ValidateOAuthState(context.Context, string) (string, string, int64, string, error)
-	GenerateOAuthState(context.Context, string, string, int64, string) (string, error)
+	GetIDForRemoteUser(ctx context.Context, remoteUserID, provider, clientID string) (int64, error)
+	RecordRemoteUserID(ctx context.Context, localUserID int64, remoteUserID, provider, clientID, accessToken string) error
+	ValidateOAuthState(ctx context.Context, state string) (string, string, int64, string, error)
+	GenerateOAuthState(ctx context.Context, provider string, clientID string, attachUser int64, inviteCode string) (string, error)
 	GetOauthAccounts(ctx context.Context, userID int64) ([]oauthAccountInfo, error)
 	RemoveOauth(ctx context.Context, userID int64, provider string, clientID string, remoteUserID string) error
 
@@ -311,10 +311,10 @@ func (db *datastore) CreateCollection(cfg *config.Config, alias, title string, u
 	return c, nil
 }
 
-func (db *datastore) GetUserByID(id int64) (*User, error) {
-	u := &User{ID: id}
+func (db *datastore) GetUserByID(userID int64) (*User, error) {
+	u := &User{ID: userID}
 
-	err := db.QueryRow("SELECT username, password, email, created, status FROM users WHERE id = ?", id).Scan(&u.Username, &u.HashedPass, &u.Email, &u.Created, &u.Status)
+	err := db.QueryRow("SELECT username, password, email, created, status FROM users WHERE id = ?", userID).Scan(&u.Username, &u.HashedPass, &u.Email, &u.Created, &u.Status)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, ErrUserNotFound
@@ -328,10 +328,10 @@ func (db *datastore) GetUserByID(id int64) (*User, error) {
 
 // IsUserSilenced returns true if the user account associated with id is
 // currently silenced.
-func (db *datastore) IsUserSilenced(id int64) (bool, error) {
-	u := &User{ID: id}
+func (db *datastore) IsUserSilenced(userID int64) (bool, error) {
+	u := &User{ID: userID}
 
-	err := db.QueryRow("SELECT status FROM users WHERE id = ?", id).Scan(&u.Status)
+	err := db.QueryRow("SELECT status FROM users WHERE id = ?", userID).Scan(&u.Status)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return false, ErrUserNotFound
@@ -347,32 +347,32 @@ func (db *datastore) IsUserSilenced(id int64) (bool, error) {
 // authenticating with the account, such a passphrase or email address.
 // Any errors are reported to admin and silently quashed, returning false as the
 // result.
-func (db *datastore) DoesUserNeedAuth(id int64) bool {
+func (db *datastore) DoesUserNeedAuth(userID int64) bool {
 	var pass, email []byte
 
 	// Find out if user has an email set first
-	err := db.QueryRow("SELECT password, email FROM users WHERE id = ?", id).Scan(&pass, &email)
+	err := db.QueryRow("SELECT password, email FROM users WHERE id = ?", userID).Scan(&pass, &email)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		// ERROR. Don't give false positives on needing auth methods
 		return false
 	case err != nil:
 		// ERROR. Don't give false positives on needing auth methods
-		log.Error("Couldn't SELECT user %d from users: %v", id, err)
+		log.Error("Couldn't SELECT user %d from users: %v", userID, err)
 		return false
 	}
 	// User doesn't need auth if there's an email
 	return len(email) == 0 && len(pass) == 0
 }
 
-func (db *datastore) IsUserPassSet(id int64) (bool, error) {
+func (db *datastore) IsUserPassSet(userID int64) (bool, error) {
 	var pass []byte
-	err := db.QueryRow("SELECT password FROM users WHERE id = ?", id).Scan(&pass)
+	err := db.QueryRow("SELECT password FROM users WHERE id = ?", userID).Scan(&pass)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return false, nil
 	case err != nil:
-		log.Error("Couldn't SELECT user %d from users: %v", id, err)
+		log.Error("Couldn't SELECT user %d from users: %v", userID, err)
 		return false, err
 	}
 
@@ -845,8 +845,8 @@ func (db *datastore) GetCollectionForPad(alias string) (*Collection, error) {
 	return c, nil
 }
 
-func (db *datastore) GetCollectionByID(id int64) (*Collection, error) {
-	return db.GetCollectionBy("id = ?", id)
+func (db *datastore) GetCollectionByID(collectionID int64) (*Collection, error) {
+	return db.GetCollectionBy("id = ?", collectionID)
 }
 
 func (db *datastore) GetCollectionFromDomain(host string) (*Collection, error) {
@@ -1021,13 +1021,13 @@ const postCols = "id, slug, text_appearance, language, rtl, privacy, owner_id, c
 
 // GetEditablePost returns a PublicPost with the given ID only if the given
 // edit token is valid for the post.
-func (db *datastore) GetEditablePost(id, editToken string) (*PublicPost, error) {
+func (db *datastore) GetEditablePost(postID, editToken string) (*PublicPost, error) {
 	// FIXME: code duplicated from getPost()
 	// TODO: add slight logic difference to getPost / one func
 	var ownerName sql.NullString
 	p := &Post{}
 
-	row := db.QueryRow("SELECT "+postCols+", (SELECT username FROM users WHERE users.id = posts.owner_id) AS username FROM posts WHERE id = ? LIMIT 1", id)
+	row := db.QueryRow("SELECT "+postCols+", (SELECT username FROM users WHERE users.id = posts.owner_id) AS username FROM posts WHERE id = ? LIMIT 1", postID)
 	err := row.Scan(&p.ID, &p.Slug, &p.Font, &p.Language, &p.RTL, &p.Privacy, &p.OwnerID, &p.CollectionID, &p.PinnedPosition, &p.Created, &p.Updated, &p.ViewCount, &p.Title, &p.Content, &ownerName)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
@@ -1049,9 +1049,9 @@ func (db *datastore) GetEditablePost(id, editToken string) (*PublicPost, error) 
 	return &res, nil
 }
 
-func (db *datastore) PostIDExists(id string) bool {
+func (db *datastore) PostIDExists(postID string) bool {
 	var dummy bool
-	err := db.QueryRow("SELECT 1 FROM posts WHERE id = ?", id).Scan(&dummy)
+	err := db.QueryRow("SELECT 1 FROM posts WHERE id = ?", postID).Scan(&dummy)
 	return err == nil && dummy
 }
 
@@ -1061,13 +1061,13 @@ func (db *datastore) PostIDExists(id string) bool {
 // TODO: break this into two functions:
 //   - GetPost(id string)
 //   - GetCollectionPost(slug string, collectionID int64)
-func (db *datastore) GetPost(id string, collectionID int64) (*PublicPost, error) {
+func (db *datastore) GetPost(postID string, collectionID int64) (*PublicPost, error) {
 	var ownerName sql.NullString
 	p := &Post{}
 
 	var row *sql.Row
 	var where string
-	params := []interface{}{id}
+	params := []interface{}{postID}
 	if collectionID > 0 {
 		where = "slug = ? AND collection_id = ?"
 		params = append(params, collectionID)
@@ -1100,12 +1100,12 @@ func (db *datastore) GetPost(id string, collectionID int64) (*PublicPost, error)
 }
 
 // TODO: don't duplicate getPost() functionality
-func (db *datastore) GetOwnedPost(id string, ownerID int64) (*PublicPost, error) {
+func (db *datastore) GetOwnedPost(postID string, ownerID int64) (*PublicPost, error) {
 	p := &Post{}
 
 	var row *sql.Row
 	where := "id = ? AND owner_id = ?"
-	params := []interface{}{id, ownerID}
+	params := []interface{}{postID, ownerID}
 	row = db.QueryRow("SELECT "+postCols+" FROM posts WHERE "+where+" LIMIT 1", params...)
 	err := row.Scan(&p.ID, &p.Slug, &p.Font, &p.Language, &p.RTL, &p.Privacy, &p.OwnerID, &p.CollectionID, &p.PinnedPosition, &p.Created, &p.Updated, &p.ViewCount, &p.Title, &p.Content)
 	switch {
@@ -1125,7 +1125,7 @@ func (db *datastore) GetOwnedPost(id string, ownerID int64) (*PublicPost, error)
 	return &res, nil
 }
 
-func (db *datastore) GetPostProperty(id string, collectionID int64, property string) (interface{}, error) {
+func (db *datastore) GetPostProperty(postID string, collectionID int64, property string) (interface{}, error) {
 	propSelects := map[string]string{
 		"views": "view_count AS views",
 	}
@@ -1137,9 +1137,9 @@ func (db *datastore) GetPostProperty(id string, collectionID int64, property str
 	var res interface{}
 	var row *sql.Row
 	if collectionID != 0 {
-		row = db.QueryRow("SELECT "+selectQuery+" FROM posts WHERE slug = ? AND collection_id = ? LIMIT 1", id, collectionID)
+		row = db.QueryRow("SELECT "+selectQuery+" FROM posts WHERE slug = ? AND collection_id = ? LIMIT 1", postID, collectionID)
 	} else {
-		row = db.QueryRow("SELECT "+selectQuery+" FROM posts WHERE id = ? LIMIT 1", id)
+		row = db.QueryRow("SELECT "+selectQuery+" FROM posts WHERE id = ? LIMIT 1", postID)
 	}
 	err := row.Scan(&res)
 	switch {
@@ -1519,14 +1519,14 @@ func (db *datastore) DispersePosts(userID int64, postIDs []string) (*[]ClaimPost
 		}
 
 		var qRes sql.Result
-		var query string
+		var postQuery string
 		var params []interface{}
 		// Do AND owner_id = ? for sanity.
 		// This should've been caught and returned with a good error message
 		// just above.
-		query = "UPDATE posts SET collection_id = NULL WHERE id = ? AND owner_id = ?"
+		postQuery = "UPDATE posts SET collection_id = NULL WHERE id = ? AND owner_id = ?"
 		params = []interface{}{postID, userID}
-		qRes, err = db.Exec(query, params...)
+		qRes, err = db.Exec(postQuery, params...)
 		if err != nil {
 			r.Code = http.StatusInternalServerError
 			r.ErrorMessage = "A glitch happened on our end."
@@ -1592,7 +1592,7 @@ func (db *datastore) ClaimPosts(cfg *config.Config, userID int64, collAlias stri
 
 		var err error
 		var qRes sql.Result
-		var query string
+		var postQuery string
 		var params []interface{}
 		var slugIdx = -1
 		var coll *Collection
@@ -1657,19 +1657,19 @@ func (db *datastore) ClaimPosts(cfg *config.Config, userID int64, collAlias stri
 			if canCollect {
 				// User already owns this post, so just add it to the given
 				// collection.
-				query = "UPDATE posts SET collection_id = ?, slug = ? WHERE id = ? AND owner_id = ?"
+				postQuery = "UPDATE posts SET collection_id = ?, slug = ? WHERE id = ? AND owner_id = ?"
 				params = []interface{}{coll.ID, p.Slug, p.ID, userID}
 				slugIdx = 1
 			} else {
-				query = "UPDATE posts SET owner_id = ?, collection_id = ?, slug = ? WHERE id = ? AND modify_token = ? AND owner_id IS NULL"
+				postQuery = "UPDATE posts SET owner_id = ?, collection_id = ?, slug = ? WHERE id = ? AND modify_token = ? AND owner_id IS NULL"
 				params = []interface{}{userID, coll.ID, p.Slug, p.ID, p.Token}
 				slugIdx = 2
 			}
 		} else {
-			query = "UPDATE posts SET owner_id = ? WHERE id = ? AND modify_token = ? AND owner_id IS NULL"
+			postQuery = "UPDATE posts SET owner_id = ? WHERE id = ? AND modify_token = ? AND owner_id IS NULL"
 			params = []interface{}{userID, p.ID, p.Token}
 		}
-		qRes, err = db.AttemptClaim(&p, query, params, slugIdx)
+		qRes, err = db.AttemptClaim(&p, postQuery, params, slugIdx)
 		if err != nil {
 			r.Code = http.StatusInternalServerError
 			r.ErrorMessage = "An unknown error occurred."
@@ -1742,9 +1742,9 @@ func (db *datastore) UpdatePostPinState(pinned bool, postID string, collID, owne
 	return nil
 }
 
-func (db *datastore) GetLastPinnedPostPos(collID int64) int64 {
+func (db *datastore) GetLastPinnedPostPos(collectionID int64) int64 {
 	var lastPos sql.NullInt64
-	err := db.QueryRow("SELECT MAX(pinned_position) FROM posts WHERE collection_id = ? AND pinned_position IS NOT NULL", collID).Scan(&lastPos)
+	err := db.QueryRow("SELECT MAX(pinned_position) FROM posts WHERE collection_id = ? AND pinned_position IS NOT NULL", collectionID).Scan(&lastPos)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return -1
@@ -2344,9 +2344,9 @@ func (db *datastore) DeleteCollection(alias string, userID int64) error {
 	return nil
 }
 
-func (db *datastore) IsCollectionAttributeOn(id int64, attr string) bool {
+func (db *datastore) IsCollectionAttributeOn(collectionID int64, attr string) bool {
 	var v string
-	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", id, attr).Scan(&v)
+	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", collectionID, attr).Scan(&v)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return false
@@ -2357,9 +2357,9 @@ func (db *datastore) IsCollectionAttributeOn(id int64, attr string) bool {
 	return v == "1"
 }
 
-func (db *datastore) CollectionHasAttribute(id int64, attr string) bool {
+func (db *datastore) CollectionHasAttribute(collectionID int64, attr string) bool {
 	var dummy string
-	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", id, attr).Scan(&dummy)
+	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", collectionID, attr).Scan(&dummy)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return false
@@ -2370,9 +2370,9 @@ func (db *datastore) CollectionHasAttribute(id int64, attr string) bool {
 	return true
 }
 
-func (db *datastore) GetCollectionAttribute(id int64, attr string) string {
+func (db *datastore) GetCollectionAttribute(collectionID int64, attr string) string {
 	var v string
-	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", id, attr).Scan(&v)
+	err := db.QueryRow("SELECT value FROM collectionattributes WHERE collection_id = ? AND attribute = ?", collectionID, attr).Scan(&v)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return ""
@@ -2383,8 +2383,8 @@ func (db *datastore) GetCollectionAttribute(id int64, attr string) string {
 	return v
 }
 
-func (db *datastore) SetCollectionAttribute(id int64, attr, v string) error {
-	_, err := db.Exec("INSERT INTO collectionattributes (collection_id, attribute, value) VALUES (?, ?, ?) "+db.upsert("collection_id", "attribute")+" value = ?", id, attr, v, v)
+func (db *datastore) SetCollectionAttribute(collectionID int64, attr, v string) error {
+	_, err := db.Exec("INSERT INTO collectionattributes (collection_id, attribute, value) VALUES (?, ?, ?) "+db.upsert("collection_id", "attribute")+" value = ?", collectionID, attr, v, v)
 	if err != nil {
 		log.Error("Unable to INSERT into collectionattributes: %v", err)
 		return err
@@ -2580,8 +2580,8 @@ func (db *datastore) GetAPActorKeys(collectionID int64) ([]byte, []byte) {
 	return pub, priv
 }
 
-func (db *datastore) CreateUserInvite(id string, userID int64, maxUses int, expires *time.Time) error {
-	_, err := db.Exec("INSERT INTO userinvites (id, owner_id, max_uses, created, expires, inactive) VALUES (?, ?, ?, "+db.now()+", ?, 0)", id, userID, maxUses, expires)
+func (db *datastore) CreateUserInvite(inviteID string, userID int64, maxUses int, expires *time.Time) error {
+	_, err := db.Exec("INSERT INTO userinvites (id, owner_id, max_uses, created, expires, inactive) VALUES (?, ?, ?, "+db.now()+", ?, 0)", inviteID, userID, maxUses, expires)
 	return err
 }
 
@@ -2602,9 +2602,9 @@ func (db *datastore) GetUserInvites(userID int64) (*[]Invite, error) {
 	return &is, nil
 }
 
-func (db *datastore) GetUserInvite(id string) (*Invite, error) {
+func (db *datastore) GetUserInvite(inviteID string) (*Invite, error) {
 	var i Invite
-	err := db.QueryRow("SELECT id, max_uses, created, expires, inactive FROM userinvites WHERE id = ?", id).Scan(&i.ID, &i.MaxUses, &i.Created, &i.Expires, &i.Inactive)
+	err := db.QueryRow("SELECT id, max_uses, created, expires, inactive FROM userinvites WHERE id = ?", inviteID).Scan(&i.ID, &i.MaxUses, &i.Created, &i.Expires, &i.Inactive)
 	switch {
 	case errors.Is(err, sql.ErrNoRows), db.isIgnorableError(err):
 		return nil, impart.HTTPError{http.StatusNotFound, "Invite doesn't exist."}
@@ -2620,18 +2620,18 @@ func (db *datastore) GetUserInvite(id string) (*Invite, error) {
 // and an error other than sql no rows, if any. Will return false in the event
 // of an error.
 func (db *datastore) IsUsersInvite(code string, userID int64) (bool, error) {
-	var id string
-	err := db.QueryRow("SELECT id FROM userinvites WHERE id = ? AND owner_id = ?", code, userID).Scan(&id)
+	var inviteID string
+	err := db.QueryRow("SELECT id FROM userinvites WHERE id = ? AND owner_id = ?", code, userID).Scan(&inviteID)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Error("Failed selecting invite: %v", err)
 		return false, err
 	}
-	return id != "", nil
+	return inviteID != "", nil
 }
 
-func (db *datastore) GetUsersInvitedCount(id string) int64 {
+func (db *datastore) GetUsersInvitedCount(inviteID string) int64 {
 	var count int64
-	err := db.QueryRow("SELECT COUNT(*) FROM usersinvited WHERE invite_id = ?", id).Scan(&count)
+	err := db.QueryRow("SELECT COUNT(*) FROM usersinvited WHERE invite_id = ?", inviteID).Scan(&count)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return 0
@@ -2684,30 +2684,30 @@ func (db *datastore) GetAllDynamicContent(t string) ([]*instanceContent, error) 
 	return pages, nil
 }
 
-func (db *datastore) GetDynamicContent(id string) (*instanceContent, error) {
+func (db *datastore) GetDynamicContent(contentID string) (*instanceContent, error) {
 	c := &instanceContent{
-		ID: id,
+		ID: contentID,
 	}
-	err := db.QueryRow("SELECT title, content, updated, content_type FROM appcontent WHERE id = ?", id).Scan(&c.Title, &c.Content, &c.Updated, &c.Type)
+	err := db.QueryRow("SELECT title, content, updated, content_type FROM appcontent WHERE id = ?", contentID).Scan(&c.Title, &c.Content, &c.Updated, &c.Type)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, nil
 	case err != nil:
-		log.Error("Couldn't SELECT FROM appcontent for id '%s': %v", id, err)
+		log.Error("Couldn't SELECT FROM appcontent for contentID '%s': %v", contentID, err)
 		return nil, err
 	}
 	return c, nil
 }
 
-func (db *datastore) UpdateDynamicContent(id, title, content, contentType string) error {
+func (db *datastore) UpdateDynamicContent(contentID, title, content, contentType string) error {
 	var err error
 	if db.driverName == dbase.TypeSQLite {
-		_, err = db.Exec("INSERT OR REPLACE INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?)", id, title, content, contentType)
+		_, err = db.Exec("INSERT OR REPLACE INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?)", contentID, title, content, contentType)
 	} else {
-		_, err = db.Exec("INSERT INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?) "+db.upsert("id")+" title = ?, content = ?, updated = "+db.now(), id, title, content, contentType, title, content)
+		_, err = db.Exec("INSERT INTO appcontent (id, title, content, updated, content_type) VALUES (?, ?, ?, "+db.now()+", ?) "+db.upsert("id")+" title = ?, content = ?, updated = "+db.now(), contentID, title, content, contentType, title, content)
 	}
 	if err != nil {
-		log.Error("Unable to INSERT appcontent for '%s': %v", id, err)
+		log.Error("Unable to INSERT appcontent for '%s': %v", contentID, err)
 	}
 	return err
 }
@@ -2752,9 +2752,9 @@ func (db *datastore) GetAllUsersCount() int64 {
 	return count
 }
 
-func (db *datastore) GetUserLastPostTime(id int64) (*time.Time, error) {
+func (db *datastore) GetUserLastPostTime(userID int64) (*time.Time, error) {
 	var t time.Time
-	err := db.QueryRow("SELECT created FROM posts WHERE owner_id = ? ORDER BY created DESC LIMIT 1", id).Scan(&t)
+	err := db.QueryRow("SELECT created FROM posts WHERE owner_id = ? ORDER BY created DESC LIMIT 1", userID).Scan(&t)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, nil
@@ -2766,17 +2766,17 @@ func (db *datastore) GetUserLastPostTime(id int64) (*time.Time, error) {
 }
 
 // SetUserStatus changes a user's status in the database. see Users.UserStatus
-func (db *datastore) SetUserStatus(id int64, status UserStatus) error {
-	_, err := db.Exec("UPDATE users SET status = ? WHERE id = ?", status, id)
+func (db *datastore) SetUserStatus(userID int64, status UserStatus) error {
+	_, err := db.Exec("UPDATE users SET status = ? WHERE id = ?", status, userID)
 	if err != nil {
 		return fmt.Errorf("failed to update user status: %w", err)
 	}
 	return nil
 }
 
-func (db *datastore) GetCollectionLastPostTime(id int64) (*time.Time, error) {
+func (db *datastore) GetCollectionLastPostTime(collectionID int64) (*time.Time, error) {
 	var t time.Time
-	err := db.QueryRow("SELECT created FROM posts WHERE collection_id = ? ORDER BY created DESC LIMIT 1", id).Scan(&t)
+	err := db.QueryRow("SELECT created FROM posts WHERE collection_id = ? ORDER BY created DESC LIMIT 1", collectionID).Scan(&t)
 	switch {
 	case errors.Is(err, sql.ErrNoRows):
 		return nil, nil

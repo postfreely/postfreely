@@ -580,15 +580,15 @@ func fetchCollectionPosts(app *App, w http.ResponseWriter, r *http.Request) erro
 	isCollOwner := userID == c.OwnerID
 
 	// Get page
-	page := 1
+	collectionPage := 1
 	if p := r.FormValue("page"); p != "" {
 		pInt, _ := strconv.Atoi(p)
 		if pInt > 0 {
-			page = pInt
+			collectionPage = pInt
 		}
 	}
 
-	ps, err := app.db.GetPosts(app.cfg, c, page, isCollOwner, false, false)
+	ps, err := app.db.GetPosts(app.cfg, c, collectionPage, isCollOwner, false, false)
 	if err != nil {
 		return err
 	}
@@ -840,7 +840,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 		return err
 	}
 
-	page := getCollectionPage(vars)
+	collectionPage := getCollectionPage(vars)
 
 	c, err := processCollectionPermissions(app, cr, u, w, r)
 	if c == nil || err != nil {
@@ -864,10 +864,10 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 
 	// Fetch extra data about the Collection
 	// TODO: refactor out this logic, shared in collection.go:fetchCollection()
-	coll := newDisplayCollection(c, cr, page)
+	coll := newDisplayCollection(c, cr, collectionPage)
 
 	coll.TotalPages = int(math.Ceil(float64(coll.TotalPosts) / float64(coll.Format.PostsPerPage())))
-	if coll.TotalPages > 0 && page > coll.TotalPages {
+	if coll.TotalPages > 0 && collectionPage > coll.TotalPages {
 		redirURL := fmt.Sprintf("/page/%d", coll.TotalPages)
 		if !app.cfg.App.SingleUser {
 			redirURL = fmt.Sprintf("/%s%s%s", cr.prefix, coll.Alias, redirURL)
@@ -875,7 +875,7 @@ func handleViewCollection(app *App, w http.ResponseWriter, r *http.Request) erro
 		return impart.HTTPError{http.StatusFound, redirURL}
 	}
 
-	coll.Posts, _ = app.db.GetPosts(app.cfg, c, page, cr.isCollOwner, false, false)
+	coll.Posts, _ = app.db.GetPosts(app.cfg, c, collectionPage, cr.isCollOwner, false, false)
 
 	// Serve collection
 	displayPage := CollectionPage{
@@ -982,14 +982,14 @@ func handleViewCollectionTag(app *App, w http.ResponseWriter, r *http.Request) e
 		return err
 	}
 
-	page := getCollectionPage(vars)
+	collectionPage := getCollectionPage(vars)
 
 	c, err := processCollectionPermissions(app, cr, u, w, r)
 	if c == nil || err != nil {
 		return err
 	}
 
-	coll := newDisplayCollection(c, cr, page)
+	coll := newDisplayCollection(c, cr, collectionPage)
 
 	taggedPostIDs, err := app.db.GetAllPostsTaggedIDs(c, tag, cr.isCollOwner)
 	if err != nil {
@@ -1007,7 +1007,7 @@ func handleViewCollectionTag(app *App, w http.ResponseWriter, r *http.Request) e
 		return impart.HTTPError{http.StatusFound, redirURL}
 	}
 
-	coll.Posts, _ = app.db.GetPostsTagged(app.cfg, c, tag, page, cr.isCollOwner)
+  coll.Posts, _ = app.db.GetPostsTagged(app.cfg, c, tag, collectionPage, cr.isCollOwner)
 	if coll.Posts != nil && len(*coll.Posts) == 0 {
 		return ErrCollectionPageNotFound
 	}
