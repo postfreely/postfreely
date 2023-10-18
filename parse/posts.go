@@ -12,7 +12,7 @@
 package parse
 
 import (
-	"github.com/writeas/web-core/stringmanip"
+	"github.com/postfreely/web-core/stringmanip"
 	"regexp"
 	"strings"
 )

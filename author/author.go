@@ -11,7 +11,7 @@
 package author
 
 import (
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"github.com/postfreely/postfreely/config"
 	"os"
 	"path/filepath"

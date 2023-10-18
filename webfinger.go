@@ -19,7 +19,7 @@ import (
 	"github.com/postfreely/postfreely/config"
 	"github.com/writeas/go-webfinger"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 type wfResolver struct {

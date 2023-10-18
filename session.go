@@ -16,7 +16,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/sessions"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 const (

@@ -16,7 +16,7 @@ import (
 	"strings"
 
 	"github.com/go-ini/ini"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
 	"golang.org/x/net/idna"

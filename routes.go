@@ -19,7 +19,7 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 	"github.com/writeas/go-webfinger"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"github.com/writefreely/go-nodeinfo"
 )
 

@@ -19,7 +19,7 @@ import (
 	"regexp"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"modernc.org/sqlite"
 	sqlite3 "modernc.org/sqlite/lib"
 

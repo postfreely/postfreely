@@ -23,8 +23,8 @@ import (
 	"github.com/gorilla/mux"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/log"
-	"github.com/writeas/web-core/memo"
+	"github.com/postfreely/web-core/log"
+	"github.com/postfreely/web-core/memo"
 
 	"github.com/postfreely/postfreely/page"
 )

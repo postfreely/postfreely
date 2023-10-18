@@ -17,7 +17,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 func exportPostsCSV(hostName string, u *User, posts *[]PublicPost) []byte {

@@ -14,8 +14,8 @@ import (
 	"time"
 
 	"github.com/guregu/null/zero"
-	"github.com/writeas/web-core/data"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/data"
+	"github.com/postfreely/web-core/log"
 
 	"github.com/postfreely/postfreely/key"
 )

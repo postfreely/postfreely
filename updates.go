@@ -17,7 +17,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 // updatesCacheTime is the default interval between cache updates for new

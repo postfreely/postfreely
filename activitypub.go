@@ -32,11 +32,11 @@ import (
 	"github.com/writeas/activityserve"
 	"github.com/writeas/httpsig"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/activitypub"
-	"github.com/writeas/web-core/activitystreams"
-	"github.com/writeas/web-core/id"
-	"github.com/writeas/web-core/log"
-	"github.com/writeas/web-core/silobridge"
+	"github.com/postfreely/web-core/activitypub"
+	"github.com/postfreely/web-core/activitystreams"
+	"github.com/postfreely/web-core/id"
+	"github.com/postfreely/web-core/log"
+	"github.com/postfreely/web-core/silobridge"
 )
 
 const (

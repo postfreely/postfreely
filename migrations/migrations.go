@@ -14,7 +14,7 @@ package migrations
 import (
 	"database/sql"
 
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 
 	dbase "github.com/postfreely/postfreely/db"
 )

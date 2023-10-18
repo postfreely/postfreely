@@ -3,7 +3,6 @@ module github.com/postfreely/postfreely
 go 1.20
 
 require (
-	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fatih/color v1.15.0
 	github.com/go-ini/ini v1.67.0
@@ -33,19 +32,22 @@ require (
 	github.com/writeas/monday v0.0.0-20181024183321-54a7dd579219
 	github.com/writeas/saturday v1.7.2-0.20200427193424-392b95a03320
 	github.com/writeas/slug v1.2.0
-	github.com/writeas/web-core v1.5.0
 	github.com/writefreely/go-gopher v0.0.0-20220429181814-40127126f83b
 	github.com/writefreely/go-nodeinfo v1.2.0
+	github.com/yuin/goldmark v1.5.6
+	go.abhg.dev/goldmark/hashtag v0.3.1
 	golang.org/x/crypto v0.13.0
 	golang.org/x/net v0.15.0
 	modernc.org/sqlite v1.20.0
-	github.com/yuin/goldmark v1.5.6
-	go.abhg.dev/goldmark/hashtag v0.3.1
+)
+
+require (
 	code.as/core/socks v1.0.0 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/beevik/etree v1.1.0 // indirect
 	github.com/captncraig/cors v0.0.0-20190703115713-e80254a89df1 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/uniuri v0.0.0-20200228104902-7aecb25e1fe5 // indirect
@@ -67,6 +69,7 @@ require (
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/postfreely/web-core v0.0.0-20231018152930-28009d590e3a // indirect
 	github.com/rainycape/unidecode v0.0.0-20150907023854-cb7f23ec59be // indirect
 	github.com/remyoudompheng/bigfft v0.0.0-20200410134404-eec4a21b6bb0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect

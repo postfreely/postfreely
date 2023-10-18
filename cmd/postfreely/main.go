@@ -18,7 +18,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/urfave/cli/v2"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 
 	"github.com/postfreely/postfreely"
 )

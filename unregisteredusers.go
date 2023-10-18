@@ -17,7 +17,7 @@ import (
 	"net/http"
 
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 func handleWebSignup(app *App, w http.ResponseWriter, r *http.Request) error {

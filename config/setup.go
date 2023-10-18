@@ -15,7 +15,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/manifoldco/promptui"
 	"github.com/mitchellh/go-wordwrap"
-	"github.com/writeas/web-core/auth"
+	"github.com/postfreely/web-core/auth"
 	"strconv"
 	"strings"
 )

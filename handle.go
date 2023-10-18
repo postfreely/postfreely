@@ -24,7 +24,7 @@ import (
 	"github.com/postfreely/postfreely/config"
 	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"github.com/writefreely/go-gopher"
 )
 

@@ -23,8 +23,8 @@ import (
 	"strings"
 
 	"github.com/dustin/go-humanize"
-	"github.com/writeas/web-core/l10n"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/l10n"
+	"github.com/postfreely/web-core/log"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 

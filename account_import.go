@@ -15,7 +15,7 @@ import (
 	"github.com/hashicorp/go-multierror"
 	"github.com/writeas/impart"
 	wfimport "github.com/writeas/import"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 func viewImport(app *App, u *User, w http.ResponseWriter, r *http.Request) error {

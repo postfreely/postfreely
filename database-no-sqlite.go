@@ -14,7 +14,7 @@ package postfreely
 
 import (
 	"github.com/go-sql-driver/mysql"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 
 	dbase "github.com/postfreely/postfreely/db"
 )
