@@ -68,6 +68,7 @@ type (
 		Author      string
 		Views       int64
 		Images      []string
+		Videos      []string
 		IsPlainText bool
 		IsCode      bool
 		IsLinkable  bool
@@ -113,6 +114,7 @@ type (
 		HTMLExcerpt    template.HTML `db:"content" json:"-"`
 		Tags           []string      `json:"tags"`
 		Images         []string      `json:"images,omitempty"`
+		Videos         []string      `json:"videos,omitempty"`
 		IsPaid         bool          `json:"paid"`
 
 		OwnerName string `json:"owner,omitempty"`
@@ -416,6 +418,7 @@ func handleViewPost(app *App, w http.ResponseWriter, r *http.Request) error {
 		if !isRaw {
 			post.HTMLContent = template.HTML(applyMarkdown([]byte(content), "", app.cfg))
 			post.Images = extractImages(post.Content)
+			post.Videos = extractVideos(post.Content)
 		}
 	}
 
@@ -1219,6 +1222,11 @@ func (p *PublicPost) ActivityObject(app *App) *activitystreams.Object {
 			o.Attachment = append(o.Attachment, activitystreams.NewImageAttachment(i))
 		}
 	}
+	if len(p.Videos) > 0 {
+		for _, video := range p.Videos {
+			o.Attachment = append(o.Attachment, activitystreams.NewVideoAttachment(video))
+		}
+	}
 	// Find mentioned users
 	mentionedUsers := make(map[string]string)
 
@@ -1596,6 +1604,7 @@ func PostsContains(sl *[]PublicPost, s *PublicPost) bool {
 func (p *Post) extractData() {
 	p.Tags = tags.Extract(p.Content)
 	p.extractImages()
+	p.extractVideos()
 }
 
 func (rp *RawPost) UserFacingCreated() string {
@@ -1631,6 +1640,36 @@ func extractImages(content string) []string {
 		}
 		// Ensure the path looks like it leads to an image file
 		if !imageURLRegex.MatchString(u.Path) {
+			continue
+		}
+		urls[uRaw] = true
+	}
+
+	resURLs := make([]string, 0)
+	for k := range urls {
+		resURLs = append(resURLs, k)
+	}
+	return resURLs
+}
+
+var videoURLRegex = regexp.MustCompile(`(?i)[^ ]+\.(avi|flv|mkv|mov|mp4|ogv|webm|wmv)$`)
+
+func (p *Post) extractVideos() {
+	p.Videos = extractVideos(p.Content)
+}
+
+func extractVideos(content string) []string {
+	matches := extract.ExtractUrls(content)
+	urls := map[string]bool{}
+	for i := range matches {
+		uRaw := matches[i].Text
+		// Parse the extracted text so we can examine the path
+		u, err := url.Parse(uRaw)
+		if err != nil {
+			continue
+		}
+		// Ensure the path looks like it leads to an image file
+		if !videoURLRegex.MatchString(u.Path) {
 			continue
 		}
 		urls[uRaw] = true
