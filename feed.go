@@ -18,7 +18,7 @@ import (
 	"github.com/gorilla/feeds"
 	"github.com/gorilla/mux"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 func ViewFeed(app *App, w http.ResponseWriter, req *http.Request) error {

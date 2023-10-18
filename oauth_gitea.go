@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"net/http"
 	"net/url"
 	"strings"

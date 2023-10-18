@@ -11,7 +11,7 @@
 package config
 
 import (
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"golang.org/x/net/idna"
 	"net/http"
 	"net/url"

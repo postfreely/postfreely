@@ -20,8 +20,8 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/postfreely/postfreely/page"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/id"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/id"
+	"github.com/postfreely/web-core/log"
 )
 
 type Invite struct {

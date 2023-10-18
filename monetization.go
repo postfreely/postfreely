@@ -15,7 +15,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 	"io"
 	"net/http"
 	"net/url"

@@ -35,9 +35,9 @@ import (
 	"github.com/manifoldco/promptui"
 	stripmd "github.com/writeas/go-strip-markdown/v2"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/auth"
-	"github.com/writeas/web-core/converter"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/auth"
+	"github.com/postfreely/web-core/converter"
+	"github.com/postfreely/web-core/log"
 	"golang.org/x/crypto/acme/autocert"
 
 	"github.com/postfreely/postfreely/author"

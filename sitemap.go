@@ -17,7 +17,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/ikeikeikeike/go-sitemap-generator/v2/stm"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/log"
 )
 
 func buildSitemap(host, alias string) *stm.Sitemap {

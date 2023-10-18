@@ -27,9 +27,9 @@ import (
 	"github.com/gorilla/sessions"
 	"github.com/guregu/null/zero"
 	"github.com/writeas/impart"
-	"github.com/writeas/web-core/auth"
-	"github.com/writeas/web-core/data"
-	"github.com/writeas/web-core/log"
+	"github.com/postfreely/web-core/auth"
+	"github.com/postfreely/web-core/data"
+	"github.com/postfreely/web-core/log"
 
 	"github.com/postfreely/postfreely/author"
 	"github.com/postfreely/postfreely/config"
